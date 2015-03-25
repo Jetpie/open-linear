@@ -1,2 +1,2 @@
-# OpenLinear
+# open-linear
 open source linear model
