@@ -1,6 +1,8 @@
 // Linear Models
 //
-// Naming Convention: I utilize the
+// Naming Convention: all mathematical matrix variables are denoted
+//                    by captial letters like 'X' or 'W'
+//
 // @author: Bingqing Qu
 //
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
