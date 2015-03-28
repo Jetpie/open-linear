@@ -12,7 +12,11 @@
 
 class LogisticRegression : protected LinearBase
 {
-    void train(const DatasetPtr, ParamPtr);
+public:
+    LogisticRegression(void);
+    ~LogisticRegression(void);
+
+    void train(const DatasetPtr, const );
     void predict_proba();
 
 };

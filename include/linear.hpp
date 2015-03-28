@@ -14,6 +14,8 @@
 
 #include "solver.hpp"
 
+#include <assert.h>
+
 /// Dataset parameters
 struct Dataset
 {
@@ -56,7 +58,12 @@ struct Model
     CSR_Matrix W;
     /** define a bias, 0 if no bias setting */
     double bias;
+
 };
+
+bool check_dataset(const Dataset);
+bool check_parameter(const Parameter);
+bool check_model(const Model);
 
 /// Base class for linear models
 ///
@@ -65,7 +72,7 @@ struct Model
 class LinearBase
 {
 protected:
-    // symbolic links for short implementations
+    // symbolic links for short implementation views
     typedef shared_ptr<Model> ModelPtr;
     typedef shared_ptr<Parameter> ParamPtr;
     typedef shared_ptr<Dataset> DatasetPtr;
@@ -75,14 +82,12 @@ protected:
     //
     ParamPtr parameter_;
     void decision(void);
-    ModelPtr init_model(model);
 
 public:
-    LinearBase(ParamPtr);
-    ~LinearBase(void);
-    void set_parameter();
+    LinearBase(void) : model_(NULL) {};
+    virtual ~LinearBase(void){};
 
-    virtual void train(const DatasetPtr, ParamPtr) = 0;
+    virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual void predict_proba() = 0;
 };
 
