@@ -1,7 +1,11 @@
 // Solver formulations
 //
-// Naming Convention: solver classes are named by all capital letter denote
-//                    type and a "Solver" prefix separated by underscore
+// Naming Convention: 1.solver classes are named by all capital letter
+//                    denote type and a "Solver" prefix separated by
+//                    underscore.
+//                    2.some math notation like w^t by x will be denoted
+//                    as wTx, which big T means transpose.
+//
 //
 // @author: Bingqing Qu
 //
@@ -12,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include <Eigen/Dense>
+#include <Eigen/SparseCore>
 using namespace std;
 using namespace Eigen
 
@@ -36,11 +40,12 @@ public:
 class L2R_LR_Solver : public SolverBase
 {
 private:
-    const DatasetPtr
+    const DatasetPtr dataset_;
 public:
     L2R_LR_Solver(const DatasetPtr);
     ~L2R_LR_Solver();
 
-    double loss(CSR_Matrix);
+    double loss(CSR_Vector, double*);
     CSR_Matrix gradient(CSR_Matrix);
+
 };

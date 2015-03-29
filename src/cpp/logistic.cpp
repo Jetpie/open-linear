@@ -35,10 +35,10 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     int n_sample = dataset->n_sample;
     int dimension = dataset->dimension;
 
-    // init model
+    // initialize model
     Model* model = make_shared<Model>();
     // sanity check
     assert(model);
-
+    model->bias = param->bias;
 
 }

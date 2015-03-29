@@ -58,6 +58,8 @@ struct Model
     CSR_Matrix W;
     /** define a bias, 0 if no bias setting */
     double bias;
+    /** labels of classes */
+    int* labels;
 
 };
 
