@@ -13,27 +13,23 @@
 //
 // @license: See LICENSE at root directory
 
-#include <string>
-#include <vector>
-
-#include <Eigen/SparseCore>
-using namespace std;
-using namespace Eigen
-
-typedef Eigen::SparseMatrix<double> CSR_Matrix;
-typedef Eigen::SparseVector<vector> CSR_Vector;
+#include "linear.hpp"
 
 ///
 ///
 class SolverBase
 {
 public:
-    virtual ~function(void) {}
+    virtual ~SolverBase(void) {}
 
     virtual double loss() = 0;
     virtual void gradient() = 0;
 
 };
+// symbolic links for short implementation views
+typedef shared_ptr<Model> ModelPtr;
+typedef shared_ptr<Parameter> ParamPtr;
+typedef shared_ptr<Dataset> DatasetPtr;
 
 ///
 ///

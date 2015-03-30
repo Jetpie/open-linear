@@ -12,15 +12,23 @@
 #ifndef LINEAR_H_
 #define LINEAR_H_
 
-#include "solver.hpp"
-
 #include <assert.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <memory>
+#include <Eigen/SparseCore>
+using namespace std;
+using namespace Eigen;
+
+typedef Eigen::SparseMatrix<double> CSR_Matrix;
+typedef Eigen::SparseVector<double> CSR_Vector;
 
 /// Dataset parameters
 struct Dataset
 {
     /** number of samples */
-    size_t int n_sample;
+    size_t n_samples;
     /** feature dimension */
     size_t dimension;
     /** targets */
@@ -31,8 +39,8 @@ struct Dataset
 };
 enum SolverType
 {
-    "L2R_LR",
-    "L1R_LR";
+    L2R_LR,
+    L1R_LR
 };
 
 /// Parameters for training
@@ -66,6 +74,11 @@ struct Model
 bool check_dataset(const Dataset);
 bool check_parameter(const Parameter);
 bool check_model(const Model);
+// symbolic links for short implementation views
+typedef shared_ptr<Model> ModelPtr;
+typedef shared_ptr<Parameter> ParamPtr;
+typedef shared_ptr<Dataset> DatasetPtr;
+
 
 /// Base class for linear models
 ///
@@ -74,11 +87,6 @@ bool check_model(const Model);
 class LinearBase
 {
 protected:
-    // symbolic links for short implementation views
-    typedef shared_ptr<Model> ModelPtr;
-    typedef shared_ptr<Parameter> ParamPtr;
-    typedef shared_ptr<Dataset> DatasetPtr;
-
     //
     ModelPtr model_;
     //

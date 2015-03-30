@@ -9,4 +9,4 @@
 //
 // @license: See LICENSE at root directory
 
-#include "linear.hpp";
+#include "linear.hpp"
