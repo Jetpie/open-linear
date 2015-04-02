@@ -18,11 +18,19 @@
 #include <vector>
 #include <memory>
 #include <Eigen/SparseCore>
+#include <Eigen/Core>
 using namespace std;
 using namespace Eigen;
 
-typedef Eigen::SparseMatrix<double> CSR_Matrix;
-typedef Eigen::SparseVector<double> CSR_Vector;
+// Define vector and matrix types we will use
+typedef Eigen::SparseMatrix<double, RowMajor> CRS_RowMatrix;
+typedef Eigen::SparseMatrix<double, ColMajor> CRS_ColMatrix;
+typedef Eigen::SparseVector<double, RowMajor> CRS_RowVector;
+typedef Eigen::SparseVector<double, ColMajor> CRS_ColVector;
+typedef Eigen::Matrix<double, Dynamic, 1      , ColMajor> ColVector;
+typedef Eigen::Matrix<double, 1      , Dynamic, RowMajor> RowVector;
+typedef Eigen::Matrix<double, Dynamic, Dynamic, RowMajor> RowMatrix;
+typedef Eigen::Matrix<double, Dynamic, Dynamic, ColMajor> ColMatrix;
 
 /// Dataset parameters
 struct Dataset
@@ -32,9 +40,12 @@ struct Dataset
     /** feature dimension */
     size_t dimension;
     /** targets */
-    int* y;
-    /** features w.r.t order of y*/
-    CSR_Matrix X;
+    vector<double> y;
+    /**
+     * features w.r.t order of y
+     * dimension is dimension * n_samples
+     */
+    CRS_ColMatrix X;
 
 };
 enum SolverType
@@ -51,7 +62,7 @@ struct Parameter
     /** tolerance for training stop criteria */
     double tolerance;
     /** C */
-    double C;
+    vector<double> C;
     double bias;
 };
 
@@ -63,22 +74,22 @@ struct Model
     /** dimension of feature */
     size_t dimension;
     /** weights */
-    CSR_Matrix W;
+    ColMatrix W;
     /** define a bias, 0 if no bias setting */
     double bias;
     /** labels of classes */
-    int* labels;
+    vector<int> labels;
 
 };
 
-bool check_dataset(const Dataset);
-bool check_parameter(const Parameter);
-bool check_model(const Model);
 // symbolic links for short implementation views
 typedef shared_ptr<Model> ModelPtr;
 typedef shared_ptr<Parameter> ParamPtr;
 typedef shared_ptr<Dataset> DatasetPtr;
 
+bool check_dataset(const Dataset);
+bool check_parameter(const Parameter);
+bool check_model(const Model);
 
 /// Base class for linear models
 ///
@@ -87,9 +98,9 @@ typedef shared_ptr<Dataset> DatasetPtr;
 class LinearBase
 {
 protected:
-    //
+    // model instance
     ModelPtr model_;
-    //
+    // parameter instance
     ParamPtr parameter_;
     void decision(void);
 

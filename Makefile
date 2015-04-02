@@ -31,6 +31,7 @@ SOURCES:= $(wildcard $(SRC_DIR)/cpp/*.cpp)
 OBJECTS:= $(patsubst $(SRC_DIR)/cpp/%,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 BIN_SRC:= $(wildcard $(SRC_DIR)/tests/*.cpp)
 BIN_TGT:= $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(BIN_SRC))))
+
 # generate the all-dir target
 $(eval $(call gendir, dirs, $(BIN_DIR) $(OBJ_DIR) ))
 

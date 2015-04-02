@@ -1,11 +1,13 @@
 // Solver formulations
 //
-// Naming Convention: 1.solver classes are named by all capital letter
-//                    denote type and a "Solver" prefix separated by
-//                    underscore.
-//                    2.some math notation like w^t by x will be denoted
-//                    as wTx, which big T means transpose.
-//
+// Naming Convention:
+// 1.solver classes are named by all capital letter denote type and a
+//   "Solver" prefix separated by underscore.
+// 2.some math notation like w^t by x will be denoted as wTx,
+//   which big T means transpose. For the same style, other name
+//   convention can be deduced like wT means transpose of w. It worths
+//   something to mention that big X means matrix and small x means
+//   vector. Hope this is helpful for readers.
 //
 // @author: Bingqing Qu
 //
@@ -37,11 +39,12 @@ class L2R_LR_Solver : public SolverBase
 {
 private:
     const DatasetPtr dataset_;
+    /** buffer for wTX result */
+    RowVector wTX;
 public:
     L2R_LR_Solver(const DatasetPtr);
     ~L2R_LR_Solver();
 
-    double loss(CSR_Vector, double*);
-    CSR_Matrix gradient(CSR_Matrix);
-
+    double loss(ColVector, vector<double>);
+    RowVector gradient(ColVector, vector<double>);
 };
