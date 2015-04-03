@@ -14,6 +14,8 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
+#ifndef SOLVER_H_
+#define SOLVER_H_
 
 #include "linear.hpp"
 
@@ -45,6 +47,7 @@ public:
     L2R_LR_Solver(const DatasetPtr);
     ~L2R_LR_Solver();
 
-    double loss(ColVector, vector<double>);
-    RowVector gradient(ColVector, vector<double>);
+    double loss(const ColVector, const vector<double>);
+    RowVector gradient(const ColVector, const vector<double>);
 };
+#endif// SOLVER_H_

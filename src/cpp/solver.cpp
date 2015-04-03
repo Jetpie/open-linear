@@ -23,7 +23,7 @@
  *
  */
 double
-L2R_LR_Solver::loss(ColVector w, vector<double> C)
+L2R_LR_Solver::loss(const ColVector w, const vector<double> C)
 {
     // loss value, initilization
     double f = w.squaredNorm() / 2.0;
@@ -32,7 +32,7 @@ L2R_LR_Solver::loss(ColVector w, vector<double> C)
     vector<double> y = dataset_->y;
 
     // W^T X
-    this->wTX = w.transpose*()* dataset_->X;
+    this->wTX = w.transpose() * (*(dataset_->X));
 
     for(size_t i = 0; i < n_samples; ++i)
     {
@@ -50,12 +50,9 @@ L2R_LR_Solver::loss(ColVector w, vector<double> C)
  *
  */
 RowVector
-L2R_LR_Solver::gradient(ColVector w, vector<double> C)
+L2R_LR_Solver::gradient(const ColVector w, const vector<double> C)
 {
     size_t n_samples = dataset_->n_samples;
-
-    // gradient of regularization term
-    ColVector grad = w;
     vector<double> y = dataset_->y;
 
     for(size_t i = 0; i < n_samples; ++i)
@@ -65,7 +62,7 @@ L2R_LR_Solver::gradient(ColVector w, vector<double> C)
         // C * (h_w(y_i,x_i) - 1) * y[i]
         wTX(i) = C[i] * (wTX(i) - 1) * y[i];
     }
-    ColVector grad = dataset_->X * wTX;
+    ColVector grad = (*(dataset_->X)) * wTX;
     grad += w;
 
     return grad;

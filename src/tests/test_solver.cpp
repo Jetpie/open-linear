@@ -3,11 +3,13 @@
 
 int main()
 {
+    typedef shared_ptr<CRS_ColVector> CRS_CVPtr;
     CRS_ColVector spv(1000);
     CRS_RowMatrix spm(1000,1000);
     CRS_ColMatrix spm_col(1000,1000);
     RowVector den_row_vec(1000);
     ColVector den_col_vec(1000);
+    CRS_CVPtr sp_col_vec = make_shared<CRS_ColVector>(1000);
     for (size_t i = 0; i < 1000 ; ++i)
     {
         den_row_vec(i) = i*i;
@@ -19,13 +21,19 @@ int main()
     {
         spv.coeffRef(i) = 1.5;
         spv.coeffRef(i*i) = 2.5;
+        sp_col_vec->coeffRef(i) = 1.5;
+        sp_col_vec->coeffRef(i*i) = 2.5;
     }
 
-    CRS_RowVector copy_spv = spv;
+    CRS_ColVector copy_spv = spv;
+    CRS_CVPtr copy_sp_col_vec = sp_col_vec;
     spv.coeffRef(10) = 1.5;
     spv.coeffRef(999) = 1.5;
     spv.coeffRef(100) = 2.5;
+    sp_col_vec->coeffRef(999) = 2.5;
     cout << copy_spv << endl;
+    cout << spv << endl;
+    cout << *copy_sp_col_vec << endl;
     cout << "time test:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
     cout << spv.squaredNorm() / 2.0 << endl;
     for(size_t i = 0; i < 15 ;++i)
@@ -58,8 +66,8 @@ int main()
     res =  spv.transpose() * spm;
     cout << "time test:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
     start = clock();
-     res =  spv.transpose() * spm;
-    cout << "time test:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
+    res =  (*sp_col_vec).transpose() * spm;
+    cout << "smart pointer time test:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
     start = clock();
      res =  spv.transpose() * spm;
     cout << "time test:" << float(clock() -start)/CLOCKS_PER_SEC << endl;

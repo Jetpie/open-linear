@@ -22,7 +22,7 @@
 using namespace std;
 using namespace Eigen;
 
-// Define vector and matrix types we will use
+// Define Eigen vector and matrix types we will use
 typedef Eigen::SparseMatrix<double, RowMajor> CRS_RowMatrix;
 typedef Eigen::SparseMatrix<double, ColMajor> CRS_ColMatrix;
 typedef Eigen::SparseVector<double, RowMajor> CRS_RowVector;
@@ -31,6 +31,9 @@ typedef Eigen::Matrix<double, Dynamic, 1      , ColMajor> ColVector;
 typedef Eigen::Matrix<double, 1      , Dynamic, RowMajor> RowVector;
 typedef Eigen::Matrix<double, Dynamic, Dynamic, RowMajor> RowMatrix;
 typedef Eigen::Matrix<double, Dynamic, Dynamic, ColMajor> ColMatrix;
+
+// smart pointers
+typedef std::shared_ptr<CRS_ColMatrix> P_CRS_ColMat;
 
 /// Dataset parameters
 struct Dataset
@@ -45,7 +48,7 @@ struct Dataset
      * features w.r.t order of y
      * dimension is dimension * n_samples
      */
-    CRS_ColMatrix X;
+    P_CRS_ColMat X;
 
 };
 enum SolverType
