@@ -14,6 +14,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <set>
 void print_help()
 {
     cout << "HELP" <<endl;
@@ -48,12 +49,17 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
 
     // read throgh file;
     ifstream infile(filename);
+    std::set<double> classes;
     for(string line; std::getline(infile,line);)
     {
         stringstream ss(line);
         string item;
         std::getline(ss,item,' ');
-        y.push_back(std::stod(item));
+        double label = std::stod(item);
+        y.push_back(label);
+        // check if the target has been counted
+        if(classes.find(label) == classes.end())
+            classes.insert(label);
         while(std::getline(ss,item,' '))
         {
             int i;
@@ -73,7 +79,9 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
              << __FILE__ << "," << __LINE__ << endl;
     }
     dataset->n_samples = n_samples;
+    dataset->n_classes = classes.size();
     dataset->dimension = dimension;
+    dataset->labels = vector<double>(classes.begin(),classes.end());
     dataset->y = y;
     dataset->X = make_shared<SpColMatrix>(dimension,n_samples);
     if(!dataset->X)

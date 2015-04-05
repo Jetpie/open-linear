@@ -78,7 +78,7 @@ struct Parameter
 struct Model
 {
     /** number of classes */
-    size_t n_class;
+    size_t n_classes;
     /** dimension of feature */
     size_t dimension;
     /** weights */
@@ -114,13 +114,13 @@ protected:
 
 public:
 
-    LinearBase(void) : model_(NULL) {};
+    LinearBase(void) : model_(NULL) {cout << "LinearBase Constructor" << endl;};
     virtual ~LinearBase(void){};
 
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual void predict_proba() = 0;
-    size_t preprocess_data(const DatasetPtr, vector<double> &,
-                           vector<size_t>&, vector<size_t>&);
+    void preprocess_data(const DatasetPtr, vector<size_t>&,
+                         vector<size_t>&, vector<size_t>&);
 };
 
 #endif //LINEAR_H_

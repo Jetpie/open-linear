@@ -12,12 +12,12 @@ int main(int argc, char** argv)
     // cout << *(dataset->X) << endl;
     cout << dataset->n_samples <<endl;
     cout << dataset->dimension << endl;
-    // cout << dataset->n_classes << endl;
-    // for(size_t i = 0;i<dataset->n_classes;++i)
-    // {
-    //     cout << dataset->labels[i] << ",";
+    cout << dataset->n_classes << endl;
+    for(size_t i = 0;i<dataset->n_classes;++i)
+    {
+        cout << dataset->labels[i] << ",";
 
-    // }
+    }
     cout << endl;
     for(int k =0; k < (dataset->X)->outerSize(); ++k)
     {
