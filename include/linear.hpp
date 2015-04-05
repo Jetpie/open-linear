@@ -1,7 +1,8 @@
 // Linear Models
 //
-// Naming Convention: all mathematical matrix variables are denoted
-//                    by captial letters like 'X' or 'W'
+// Naming Convention:
+// all mathematical matrix variables are denoted by captial letters
+// like 'X' or 'W'
 //
 // @author: Bingqing Qu
 //
@@ -23,32 +24,36 @@ using namespace std;
 using namespace Eigen;
 
 // Define Eigen vector and matrix types we will use
-typedef Eigen::SparseMatrix<double, RowMajor> CRS_RowMatrix;
-typedef Eigen::SparseMatrix<double, ColMajor> CRS_ColMatrix;
-typedef Eigen::SparseVector<double, RowMajor> CRS_RowVector;
-typedef Eigen::SparseVector<double, ColMajor> CRS_ColVector;
+typedef Eigen::SparseMatrix<double, RowMajor> SpRowMatrix;
+typedef Eigen::SparseMatrix<double, ColMajor> SpColMatrix;
+typedef Eigen::SparseVector<double, RowMajor> SpRowVector;
+typedef Eigen::SparseVector<double, ColMajor> SpColVector;
 typedef Eigen::Matrix<double, Dynamic, 1      , ColMajor> ColVector;
 typedef Eigen::Matrix<double, 1      , Dynamic, RowMajor> RowVector;
 typedef Eigen::Matrix<double, Dynamic, Dynamic, RowMajor> RowMatrix;
 typedef Eigen::Matrix<double, Dynamic, Dynamic, ColMajor> ColMatrix;
 
 // smart pointers
-typedef std::shared_ptr<CRS_ColMatrix> P_CRS_ColMat;
+typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 
 /// Dataset parameters
 struct Dataset
 {
     /** number of samples */
     size_t n_samples;
+    /** number of classes */
+    size_t n_classes;
     /** feature dimension */
     size_t dimension;
     /** targets */
     vector<double> y;
+    /** target labels */
+    vector<double> labels;
     /**
      * features w.r.t order of y
      * dimension is dimension * n_samples
      */
-    P_CRS_ColMat X;
+    SpColMatrixPtr X;
 
 };
 enum SolverType
@@ -81,7 +86,7 @@ struct Model
     /** define a bias, 0 if no bias setting */
     double bias;
     /** labels of classes */
-    vector<int> labels;
+    vector<double> labels;
 
 };
 
@@ -108,11 +113,14 @@ protected:
     void decision(void);
 
 public:
+
     LinearBase(void) : model_(NULL) {};
     virtual ~LinearBase(void){};
 
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual void predict_proba() = 0;
+    size_t preprocess_data(const DatasetPtr, vector<double> &,
+                           vector<size_t>&, vector<size_t>&);
 };
 
 #endif //LINEAR_H_

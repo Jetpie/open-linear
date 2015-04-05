@@ -32,13 +32,14 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
              << __FILE__ << "," << __LINE__ << endl;
     }
 
-    // size_t n_sample = dataset->n_samples;
-    // int dimension = dataset->dimension;
+    size_t n_sample = dataset->n_samples;
+    size_t dimension = dataset->dimension;
 
     // initialize model
     ModelPtr model = make_shared<Model>();
     // sanity check
     assert(model);
+
     model->bias = param->bias;
 
 }

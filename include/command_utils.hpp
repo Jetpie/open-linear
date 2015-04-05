@@ -14,7 +14,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-
 void print_help()
 {
     cout << "HELP" <<endl;
@@ -55,7 +54,6 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
         string item;
         std::getline(ss,item,' ');
         y.push_back(std::stod(item));
-
         while(std::getline(ss,item,' '))
         {
             int i;
@@ -77,7 +75,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     dataset->n_samples = n_samples;
     dataset->dimension = dimension;
     dataset->y = y;
-    dataset->X = make_shared<CRS_ColMatrix>(dimension,n_samples);
+    dataset->X = make_shared<SpColMatrix>(dimension,n_samples);
     if(!dataset->X)
     {
         cerr << "read_dataset : P_CRS_ColMat allocation failed!"
