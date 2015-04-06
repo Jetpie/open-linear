@@ -21,27 +21,27 @@
 
 ///
 ///
-class ProblemBase
+class Problem
 {
 public:
-    virtual ~ProblemBase(void) {}
+    virtual ~Problem(void) {}
 
     virtual double loss() = 0;
     virtual void gradient() = 0;
 
 };
-
+typedef std::shared_ptr<Problem> ProblemPtr;
 ///
 ///
-class L2R_LR_Problem : public ProblemBase
+class L2R_LR_Problem : public Problem
 {
 private:
     const DatasetPtr dataset_;
     /** buffer for wTX result */
     RowVector wTX;
 public:
-    L2R_LR_Solver(const DatasetPtr);
-    ~L2R_LR_Solver();
+    L2R_LR_Problem(const DatasetPtr);
+    ~L2R_LR_Problem();
 
     double loss(const ColVector, const vector<double>);
     RowVector gradient(const ColVector, const vector<double>);

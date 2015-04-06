@@ -8,6 +8,7 @@
 #ifndef SOLVER_H_
 #define SOLVER_H_
 #include "linear.hpp"
+#include "formula.hpp"
 
 /// Base class for solvers
 ///
@@ -16,7 +17,7 @@ class SolverBase
 {
 public:
     virtual ~SolverBase();
-    virtual void solve(ProblemBase) = 0;
+    virtual void solve(ProblemPtr) = 0;
 };
 
 /// Gradint descent solver
@@ -25,14 +26,14 @@ class GradientDescent: public SolverBase
 {
 public:
     ~GradientDescent();
-    void solve(ProblemBase);
+    void solve(ProblemPtr);
 };
 
 /// Stochastic gradient descent Solver
 class StochasticGD: public SolverBase
 {
     ~StochasticGD();
-    void solve(ProblemBase);
+    void solve(ProblemPtr);
 };
 
 /// Limited BFGS Solver
@@ -40,14 +41,14 @@ class L_BFGS: public SolverBase
 {
 public:
     ~L_BFGS();
-    void solve(ProblemBase);
+    void solve(ProblemPtr);
 };
 
 /// NewtonCG Optimizer
 class NewtonCG: public SolverBase
 {
     ~NewtonCG();
-    void solve(ProblemBase);
+    void solve(ProblemPtr);
 };
 
 

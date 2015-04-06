@@ -69,9 +69,9 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
 
 
     // handle two class classification problem
-    if(n_classes = 2)
+    if(n_classes == 2)
     {
-        model->W = SpColMatrix(dimension);
+        model->W = SpColVector(dimension);
 
 
     }
