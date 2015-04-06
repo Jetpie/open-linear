@@ -57,12 +57,28 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     preprocess_data(dataset, count, start_idx, perm_idx);
 
     // permute the instances
-    // 1. construct the Eigen permutation matrix
+    // -construct the Eigen permutation matrix
     PermutationMatrix<Dynamic,Dynamic> perm_matrix(n_samples);
     for(size_t i = 0; i < n_samples ;++i)
         perm_matrix.indices()[i] = perm_idx[i];
-    // 2. permutation columns
+    // -permutation columns
     *(dataset->X) = (*(dataset->X) * perm_matrix).eval();
+
+    // make copy of dataset for training
+    // dataset->X is read-only so no need for deep copy
+
+
+    // handle two class classification problem
+    if(n_classes = 2)
+    {
+        model->W = SpColMatrix(dimension);
+
+
+    }
+    else
+    {
+    }
+
 
     /*
     A benchmark test for different permuation strategies
