@@ -36,6 +36,29 @@ int main()
         spm_col.insert(i,i*i) = 1.5;
         spm_col.insert(i+5,i*i) = 1.5;
     }
+    SpColMatrix spm1(10,10);
+    spm1.insert(9,9) = 101.5;
+    spm1.insert(6,9) = 105.5;
+    spm1.insert(8,8) = 1000.5;
+    spm1.makeCompressed();
+    cout << spm1 << endl;
+    int a[] = {3,2,1,5,6,9,8,7,4,0};
+    PermutationMatrix<Dynamic,Dynamic> perm_matrix(10);
+    start = clock();
+    for(int i =0 ;i < 10 ;i++)
+    {
+        perm_matrix.indices()[i] = a[i];
+    }
+    // perm_matrix.setIdentity();
+    // perm_matrix.indices()[8] = 9;
+    // perm_matrix.indices()[9] = 8;
+    cout << perm_matrix.indices() << endl;
+
+    spm1=  (spm1* perm_matrix).eval();
+    cout << spm1 << endl;
+    cout << "time permutation:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
+    cout << "swap test : " << spm1.coeffRef(9,8) << "," <<
+        spm1.coeffRef(8,9) << endl;
     // for (SparseVector<double>::InnerIterator it(spv); it; ++it)
     // {
     //     cout << it.value() << ","

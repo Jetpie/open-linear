@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <algorithm>
 #include <Eigen/SparseCore>
 #include <Eigen/Core>
 using namespace std;
