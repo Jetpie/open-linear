@@ -57,10 +57,18 @@ struct Dataset
     SpColMatrixPtr X;
 
 };
-enum SolverType
+enum FormulaType
 {
     L2R_LR,
     L1R_LR
+};
+enum SolverType
+{
+    GD,
+    SGD,
+    NewtonCG,
+    L_BFGS,
+    TRON
 };
 
 /// Parameters for training
@@ -68,6 +76,8 @@ struct Parameter
 {
     /** define the solver type for training model */
     int solver;
+    /** define the objective function for solving */
+    int formula;
     /** tolerance for training stop criteria */
     double tolerance;
     /** C */

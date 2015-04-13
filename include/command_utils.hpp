@@ -86,7 +86,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     dataset->X = make_shared<SpColMatrix>(dimension,n_samples);
     if(!dataset->X)
     {
-        cerr << "read_dataset : P_CRS_ColMat allocation failed!"
+        cerr << "read_dataset : SpColMatrixPtr allocation failed!"
              << __FILE__ << "," << __LINE__ << endl;
     }
 
@@ -95,4 +95,86 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
 
     return dataset;
 }
+
+
+ModelPtr load_model(const string filename)
+{
+    ModelPtr model = make_shared<Model>();
+    // sanity check
+    if(!model)
+    {
+        cerr << "read_dataset : ModelPtr allocation failed!"
+             << __FILE__ << "," << __LINE__ << endl;
+    }
+
+    ifstream infile(filename);
+
+    for(string line; std::getline(infile,line);)
+    {
+        stringstream ss(line);
+        string item;
+        // get content indicator
+        std::getline(ss,item,' ');
+
+        if(item == "solver_type")
+        {
+            cout << "solver_type meet, jump over" << endl;
+        }
+        else if(item == "nr_class")
+        {
+            std::getline(ss,item,' ');
+            model->n_classes = std::stod(item);
+        }
+        else if(item == "label")
+        {
+            model->labels.reserve(model->n_classes);
+            while( std::getline(ss,item,' ') )
+                model->labels.push_back(std::stod(item));
+        }
+        else if(item == "nr_feature")
+        {
+            std::getline(ss,item,' ');
+            model->dimension = std::stod(item);
+        }
+        else if(item == "bias")
+        {
+            std::getline(ss,item,' ');
+            model->bias = std::stod(item);
+        }
+        else if(item == "w")
+        {
+            size_t cols;
+            if(model->n_classes == 2)
+                cols = 1;
+            else
+                cols = model->n_classes;
+            ColMatrix W(model->dimension, cols);
+            for(size_t i =0;i < model->dimension; ++i)
+            {
+                std::getline(infile,line);
+                stringstream ss(line);
+                string item;
+                for(size_t j =0; j < cols; ++j)
+                {
+                    std::getline(ss,item,' ');
+                    W(i,j) = std::stod(item);
+                }
+            }
+            model->W = W;
+            if(std::getline(infile,line))
+            {
+                cerr << "Model error, please check" << endl;
+            }
+        }
+        else
+        {
+            cerr << "Unexpected words in model file : " << item << endl;
+            cerr << "Please check model and read again..."  << endl;
+            return NULL;
+        }
+    }
+    return model;
+
+}
+
 #endif //COMMAND_UTILS_H_

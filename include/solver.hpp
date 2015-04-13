@@ -1,4 +1,4 @@
-// Quardrtic Problem Optimizer
+// Quardrtic and Linear Problem Optimizer
 //
 // @author: Bingqing Qu
 //
@@ -20,7 +20,7 @@ public:
     virtual void solve(ProblemPtr) = 0;
 };
 
-/// Gradint descent solver
+/// Gradint descent optimizer
 ///
 class GradientDescent: public SolverBase
 {
@@ -29,14 +29,15 @@ public:
     void solve(ProblemPtr);
 };
 
-/// Stochastic gradient descent Solver
+/// Stochastic gradient descent optimizer
 class StochasticGD: public SolverBase
 {
+public:
     ~StochasticGD();
     void solve(ProblemPtr);
 };
 
-/// Limited BFGS Solver
+/// Limited BFGS optimizer
 class L_BFGS: public SolverBase
 {
 public:
@@ -44,12 +45,25 @@ public:
     void solve(ProblemPtr);
 };
 
-/// NewtonCG Optimizer
+/// Newton conjugate gradient optimizer
 class NewtonCG: public SolverBase
 {
+public:
     ~NewtonCG();
     void solve(ProblemPtr);
 };
 
-
+/// Newton trust region optimizer
+///
+/// Reference:
+/// Chih-Jen Lin, Ruby C. Weng, and S. Sathiya Keerthi.
+/// Trust region Newton method for large-scale logistic regression.
+/// Journal of Machine Learning Research, 9:627–650, 2008.
+///
+class TRON: public SolverBase
+{
+public:
+    ~TRON();
+    void solve(ProblemPtr);
+};
 #endif// SOLVER_H_

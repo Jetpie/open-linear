@@ -72,12 +72,13 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     if(n_classes == 2)
     {
         model->W = SpColVector(dimension);
-
-
     }
     else
     {
     }
+
+    // Finally, pass model variable to member model
+    this->model_ = model;
 
 
     /*
@@ -88,21 +89,21 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     //     perm_done.col(i) = dataset->X->col(perm_idx[i]);
     // cout << "time perm_done:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
     */
-    for(size_t i=0;i<n_samples;++i)
-    {
-        cout << perm_idx[i] << ",";
-    }
-    cout << endl;
-    for(size_t i=0;i<n_classes;++i)
-    {
-        cout << start_idx[i] << ",";
-    }
-    cout << endl;
-    for(size_t i=0;i<n_classes;++i)
-    {
-        cout << count[i] << ",";
-    }
-    cout << endl;
+    // for(size_t i=0;i<n_samples;++i)
+    // {
+    //     cout << perm_idx[i] << ",";
+    // }
+    // cout << endl;
+    // for(size_t i=0;i<n_classes;++i)
+    // {
+    //     cout << start_idx[i] << ",";
+    // }
+    // cout << endl;
+    // for(size_t i=0;i<n_classes;++i)
+    // {
+    //     cout << count[i] << ",";
+    // }
+    // cout << endl;
 }
 void
 LogisticRegression::predict_proba()

@@ -21,29 +21,47 @@
 
 ///
 ///
+// class Formula
+// {
+// public:
+//     double sigmoid(double x)
+//     {
+//         return 1.0 / ( 1 + exp(x) );
+//     };
+// };
+
+///
+///
 class Problem
 {
-public:
-    virtual ~Problem(void) {}
 
-    virtual double loss() = 0;
-    virtual void gradient() = 0;
+public:
+    virtual ~Problem(void) {};
+
+    virtual double loss(const ColVector, const vector<double>) = 0;
+    virtual RowVector gradient(const ColVector, const vector<double>) = 0;
 
 };
+
+// Define the problem smart pointer type for polymorphism
 typedef std::shared_ptr<Problem> ProblemPtr;
-///
+
+/// L2-Regularized Loss Logistic Regression
 ///
 class L2R_LR_Problem : public Problem
 {
+
 private:
     const DatasetPtr dataset_;
-    /** buffer for wTX result */
-    RowVector wTX;
+    /** g are some reusable part of the processes*/
+    RowVector g_;
+
 public:
     L2R_LR_Problem(const DatasetPtr);
     ~L2R_LR_Problem();
 
     double loss(const ColVector, const vector<double>);
     RowVector gradient(const ColVector, const vector<double>);
+    ColMatrix hessian(const ColVector, const vector<double>);
 };
 #endif// FORMULA_H_

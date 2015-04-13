@@ -15,6 +15,7 @@
 //
 // @license: See LICENSE at root directory
 #include "formula.hpp"
+
 /**
  * Compute the loss function of logistic regression
  *
@@ -26,24 +27,24 @@ double
 L2R_LR_Problem::loss(const ColVector w, const vector<double> C)
 {
     // loss value, initilization
+    // l2-norm regularization term
     double f = w.squaredNorm() / 2.0;
 
     size_t n_samples = dataset_->n_samples;
     vector<double> y = dataset_->y;
 
     // W^T X
-    this->wTX = w.transpose() * (*(dataset_->X));
+    g_ = w.transpose() * (*(dataset_->X));
 
     for(size_t i = 0; i < n_samples; ++i)
     {
-        double ywTX = y[i] * wTX(i);
-        if (ywTX >= 0)
-            f += C[i] * log(1+exp(ywTX));
-        else
-            f += C[i] *(-ywTX + log(1 + exp(ywTX)));
+        double ywTX = y[i] * g_(i);
+        // loss function : negative log likelihood
+        f += C[i] * log( 1 + exp(-ywTX) );
     }
     return f;
 }
+
 /**
  * Compute the gradient
  *
@@ -57,13 +58,19 @@ L2R_LR_Problem::gradient(const ColVector w, const vector<double> C)
 
     for(size_t i = 0; i < n_samples; ++i)
     {
-        // h_w(y_i,x_i) - sigmoid function representation
-        wTX(i) = 1 / ( 1 + exp(-y[i] * wTX(i) ) );
+        // h_w(y_i,x_i) - sigmoid function
+        g_(i) = 1 / ( 1 + exp( -y[i] * g_(i) ) );
         // C * (h_w(y_i,x_i) - 1) * y[i]
-        wTX(i) = C[i] * (wTX(i) - 1) * y[i];
+        g_(i) = C[i] * (g_(i) - 1) * y[i];
     }
-    ColVector grad = (*(dataset_->X)) * wTX;
+    ColVector grad = (*(dataset_->X)) * g_;
     grad += w;
 
     return grad;
 }
+
+/**
+ *
+ *
+ *
+ */

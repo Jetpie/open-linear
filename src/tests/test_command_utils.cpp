@@ -34,4 +34,9 @@ int main(int argc, char** argv)
     }
     cout << endl;
 
+    const string model_name = "res/sample.model";
+    ModelPtr model = load_model(model_name);
+    cout << "model" <<endl;
+    cout << model->W(0,0) <<endl;
+
 }
