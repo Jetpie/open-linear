@@ -78,3 +78,57 @@ LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
 
     return;
 }
+
+double
+LinearBase::predict(const SpColVector x)
+{
+    size_t n_classes = model_->n_classes;
+    size_t dimension = model_->dimension;
+    // validate dimension
+    if(x.rows() != dimension)
+    {
+        cerr << "LinearBase::predict : input dimension not valid!"
+             << __FILE__ << "," << __LINE__ << endl;
+    }
+
+    ColVector WTx = (*model_->W).transpose() * x;
+
+    if(n_classes == 2)
+    {
+        return (WTx(0) > 0)? model_->labels[0] : model_->labels[1];
+    }
+    else
+    {
+        MatrixXd::Index max_i;
+        WTx.maxCoeff(&max_i);
+
+        return model_->labels[max_i];
+    }
+}
+
+double
+LinearBase::predict_proba(const SpColVector x, vector<double> probability)
+{
+    size_t n_classes = model_->n_classes;
+    size_t dimension = model_->dimension;
+    // validate dimension
+    if(x.rows() != dimension)
+    {
+        cerr << "LinearBase::predict : input dimension not valid!"
+             << __FILE__ << "," << __LINE__ << endl;
+    }
+
+    ColVector WTx = (*model_->W).transpose() * x;
+
+    if(n_classes == 2)
+    {
+        return (WTx(0) > 0)? model_->labels[0] : model_->labels[1];
+    }
+    else
+    {
+        MatrixXd::Index max_i;
+        WTx.maxCoeff(&max_i);
+
+        return model_->labels[max_i];
+    }
+}

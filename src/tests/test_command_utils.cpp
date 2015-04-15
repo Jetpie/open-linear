@@ -3,6 +3,7 @@
 
 int main(int argc, char** argv)
 {
+    std::cout.precision(10);
     string filename = "res/sample";
     size_t dimension = 13;
 
@@ -37,6 +38,6 @@ int main(int argc, char** argv)
     const string model_name = "res/sample.model";
     ModelPtr model = load_model(model_name);
     cout << "model" <<endl;
-    cout << model->W(0,0) <<endl;
+    cout << (*model->W) <<endl;
 
 }

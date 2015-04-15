@@ -71,7 +71,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // handle two class classification problem
     if(n_classes == 2)
     {
-        model->W = SpColVector(dimension);
+        model->W = make_shared<ColMatrix>(dimension,1);
     }
     else
     {

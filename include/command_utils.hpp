@@ -148,7 +148,7 @@ ModelPtr load_model(const string filename)
                 cols = 1;
             else
                 cols = model->n_classes;
-            ColMatrix W(model->dimension, cols);
+            ColMatrixPtr W = make_shared<ColMatrix>(model->dimension, cols);
             for(size_t i =0;i < model->dimension; ++i)
             {
                 std::getline(infile,line);
@@ -157,7 +157,7 @@ ModelPtr load_model(const string filename)
                 for(size_t j =0; j < cols; ++j)
                 {
                     std::getline(ss,item,' ');
-                    W(i,j) = std::stod(item);
+                    (*W)(i,j) = std::stod(item);
                 }
             }
             model->W = W;
