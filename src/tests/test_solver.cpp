@@ -3,6 +3,10 @@
 
 int main()
 {
+    MatrixXf m(3,3);
+    m << 1,2,3,4,5,6,7,8,9;
+    m /= 1.5;
+    cout << m << endl;
     SpColVector spv(1000);
     SpRowMatrix spm(1000,1000);
     SpColMatrix spm_col(1000,1000);

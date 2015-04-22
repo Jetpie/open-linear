@@ -79,15 +79,61 @@ LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
     return;
 }
 
+/**
+ *
+ *
+ *
+ */
+double
+LinearBase::predict(vector<FeatureNode> x)
+{
+    size_t n_classes = model_->n_classes;
+    vector<double> WTx;
+    // a little bit more space
+    WTx.reserve(n_classes);
+    WTx.assign(n_classes,0);
+    size_t n_ws = n_classes == 2 ? 1 : n_classes;
+    //
+    double* w = model_->W_;
+    size_t i;
+    // weights for current feature dimension
+    double* cur_w;
+    // compute W^T x
+    for(vector<FeatureNode>::iterator it=x.begin(); it!=x.end(); ++it)
+    {
+        cur_w = &w[(it->i) *n_ws];
+        for(i=0; i<n_ws; ++i)
+        {
+            WTx[i] += it->v * (*cur_w);
+            ++cur_w;
+        }
+
+    }
+    // threshold 0 for binary classification
+    if(n_classes==2)
+        return WTx[0] > 0 ? model_->labels[0] : model_->labels[1];
+    else
+    {
+        size_t best_idx = 0;
+        for(i=0;i<n_ws;++i)
+        {
+            if(WTx[i] > WTx[best_idx])
+                best_idx = i;
+        }
+        return model_->labels[best_idx];
+    }
+
+}
+
 double
 LinearBase::predict(const SpColVector x)
 {
     size_t n_classes = model_->n_classes;
     size_t dimension = model_->dimension;
     // validate dimension
-    if(x.rows() != dimension)
+    if((size_t)x.rows() != dimension)
     {
-        cerr << "LinearBase::predict : input dimension not valid!"
+        cerr << "LinearBase::predict : Input dimension not valid!"
              << __FILE__ << "," << __LINE__ << endl;
     }
 
@@ -109,26 +155,36 @@ LinearBase::predict(const SpColVector x)
 double
 LinearBase::predict_proba(const SpColVector x, vector<double> probability)
 {
+
     size_t n_classes = model_->n_classes;
     size_t dimension = model_->dimension;
+    if(probability.size() > 0)
+    {
+        probability.clear();
+        // reserve enough space
+        probability.reserve(n_classes+1);
+    }
     // validate dimension
-    if(x.rows() != dimension)
+    if((size_t)x.rows() != dimension)
     {
         cerr << "LinearBase::predict : input dimension not valid!"
              << __FILE__ << "," << __LINE__ << endl;
     }
 
     ColVector WTx = (*model_->W).transpose() * x;
-
+    if(n_classes!=2)
+        WTx /= WTx.sum();
+    for(int i = 0; i < WTx.rows(); ++i)
+        probability.push_back(1. / 1. + exp(-WTx(i)));
     if(n_classes == 2)
     {
+        probability.push_back(1 - probability[0]);
         return (WTx(0) > 0)? model_->labels[0] : model_->labels[1];
     }
     else
     {
         MatrixXd::Index max_i;
         WTx.maxCoeff(&max_i);
-
         return model_->labels[max_i];
     }
 }

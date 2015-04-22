@@ -37,6 +37,12 @@ typedef Eigen::Matrix<double, Dynamic, Dynamic, ColMajor> ColMatrix;
 // smart pointers
 typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
+
+struct FeatureNode
+{
+    size_t i;
+    double v;
+};
 /// Dataset parameters
 struct Dataset
 {
@@ -94,6 +100,7 @@ struct Model
     size_t dimension;
     /** weights */
     ColMatrixPtr W;
+    double * W_;
     /** define a bias, 0 if no bias setting */
     double bias;
     /** labels of classes */
@@ -125,13 +132,14 @@ protected:
 
 public:
 
-    LinearBase(void) : model_(NULL) {cout << "LinearBase Constructor" << endl;};
+    LinearBase(void) : model_(NULL) {};
     virtual ~LinearBase(void){};
 
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
-    virtual double predict_proba(const SpColVector x);
+    virtual double predict_proba(const SpColVector, vector<double>);
 
-    virtual double predict(const SpColVector x);
+    virtual double predict(const SpColVector);
+    virtual double predict(vector<FeatureNode>);
     void preprocess_data(const DatasetPtr, vector<size_t>&,
                          vector<size_t>&, vector<size_t>&);
 };
