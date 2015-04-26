@@ -9,6 +9,7 @@ obj
 
 # ignore #
 src/cpp/*#*
+include/*#*
 src/test/*#*
 src/trash
 
