@@ -7,7 +7,6 @@
 // @license: See LICENSE at root directory
 
 #include "logistic.hpp"
-// LogisticRegression::LogisticRegression() {}
 
 /**
  * Train the coefficients using depends on the parameters.

@@ -119,7 +119,6 @@ struct Model
     /** dimension of feature */
     size_t dimension;
     /** weights */
-    ColMatrixPtr W;
     double* W_;
     /** define a bias, 0 if no bias setting */
     double bias;
@@ -133,6 +132,7 @@ struct Model
 
 };
 
+typedef vector<FeatureNode> FeatureVector;
 // symbolic links for short implementation views
 typedef shared_ptr<Model> ModelPtr;
 typedef shared_ptr<Parameter> ParamPtr;
@@ -150,7 +150,7 @@ protected:
     ModelPtr model_;
     // parameter instance
     ParamPtr parameter_;
-    void predict_WTx(const vector<FeatureNode>, vector<double>&);
+    void predict_WTx(const FeatureVector, vector<double>&);
 
 public:
 
@@ -160,11 +160,8 @@ public:
     virtual ~LinearBase(void){};
 
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
-    virtual double predict(const vector<FeatureNode>);
-    virtual double predict_proba(const vector<FeatureNode>, vector<double>&);
-
-    // virtual double predict(const SpColVector);
-    // virtual double predict_proba(const SpColVector, vector<double>&);
+    virtual double predict(const FeatureVector);
+    virtual double predict_proba(const FeatureVector, vector<double>&);
 
     void preprocess_data(const DatasetPtr, vector<size_t>&,
                          vector<size_t>&, vector<size_t>&);

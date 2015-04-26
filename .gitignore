@@ -8,7 +8,9 @@ obj
 #res/images/*
 
 # ignore #
-src/ic/*#*
+src/cpp/*#*
+src/test/*#*
+src/trash
 
 # Ignore Mac specific files
 .DS_Store
