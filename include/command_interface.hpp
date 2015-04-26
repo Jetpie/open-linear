@@ -5,8 +5,8 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#ifndef COMMAND_UTILS_H_
-#define COMMAND_UTILS_H_
+#ifndef COMMAND_INTERFACE_H_
+#define COMMAND_INTERFACE_H_
 
 #include "linear.hpp"
 
@@ -184,4 +184,4 @@ ModelPtr load_model(const string filename)
 
 }
 
-#endif //COMMAND_UTILS_H_
+#endif //COMMAND_INTERFACE_H_
