@@ -13,6 +13,4 @@ int main(int argc, char** argv)
     LogisticRegression lr;
     lr.train(dataset, param);
 
-
-
 }

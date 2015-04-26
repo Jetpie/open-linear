@@ -71,11 +71,15 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // handle two class classification problem
     if(n_classes == 2)
     {
-        model->W = make_shared<ColMatrix>(dimension,1);
+        ColMatrixPtr W = make_shared<ColMatrix>(dimension,1);
     }
     else
     {
     }
+
+    // TODO: add training function calls
+    // TODO: convert W to model weights model->W_
+
 
     // Finally, pass model variable to member model
     this->model_ = model;
@@ -104,9 +108,4 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     //     cout << count[i] << ",";
     // }
     // cout << endl;
-}
-void
-LogisticRegression::predict_proba()
-{
-
 }

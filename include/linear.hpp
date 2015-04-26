@@ -4,6 +4,11 @@
 // all mathematical matrix variables are denoted by captial letters
 // like 'X' or 'W'
 //
+// The key feature of this linear model is it was implemented by
+// advanced and efficient c++ matrix library Eigen, but only for the
+// training stage. After that, the weights are stored in normal c++
+// array for fast predicting and robust interface.
+//
 // @author: Bingqing Qu
 //
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
@@ -92,6 +97,21 @@ struct Parameter
 };
 
 /// Model Parameters
+///
+/// An important note here is the key part of model - weights:
+/// the representation of weight during training phase is an Eigen
+/// dense matrix under consideration of the matrix manipultion
+/// in fomulas. But finally converted to a normal c++ array as storage.
+/// The consideration here is firstly, the low level c++ array is though
+/// not safe in memory, I can validate the memory after training and
+/// once the double* is stored, no other manipulation should have
+/// previlige to modify it until it will be released by constructor.
+/// All in all, the segmentation fault will not happen here under the
+/// help of class encapsulation.
+/// while secondly, the performance should have not much difference with
+/// vector but slight better. The linear model always means fast in
+/// industry and that "slightly" is good for all users.
+///
 struct Model
 {
     /** number of classes */
@@ -100,11 +120,16 @@ struct Model
     size_t dimension;
     /** weights */
     ColMatrixPtr W;
-    double * W_;
+    double* W_;
     /** define a bias, 0 if no bias setting */
     double bias;
     /** labels of classes */
     vector<double> labels;
+    // destructor must be called for double*
+    ~Model()
+    {
+        delete [] W_;
+    };
 
 };
 
@@ -113,9 +138,6 @@ typedef shared_ptr<Model> ModelPtr;
 typedef shared_ptr<Parameter> ParamPtr;
 typedef shared_ptr<Dataset> DatasetPtr;
 
-bool check_dataset(const Dataset);
-bool check_parameter(const Parameter);
-bool check_model(const Model);
 
 /// Base class for linear models
 ///
@@ -128,18 +150,22 @@ protected:
     ModelPtr model_;
     // parameter instance
     ParamPtr parameter_;
-    void decision(void);
+    void predict_WTx(const vector<FeatureNode>, vector<double>&);
 
 public:
 
-    LinearBase(void) : model_(NULL) {};
+    LinearBase(void);
+    LinearBase(const ModelPtr);
+    void load_model(const ModelPtr);
     virtual ~LinearBase(void){};
 
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
-    virtual double predict_proba(const SpColVector, vector<double>);
+    virtual double predict(const vector<FeatureNode>);
+    virtual double predict_proba(const vector<FeatureNode>, vector<double>&);
 
-    virtual double predict(const SpColVector);
-    virtual double predict(vector<FeatureNode>);
+    // virtual double predict(const SpColVector);
+    // virtual double predict_proba(const SpColVector, vector<double>&);
+
     void preprocess_data(const DatasetPtr, vector<size_t>&,
                          vector<size_t>&, vector<size_t>&);
 };
