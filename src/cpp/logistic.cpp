@@ -12,7 +12,7 @@
  * Train the coefficients using depends on the parameters.
  *
  * @param dataset training dataset
- * @param params parameters
+ * @param param parameters
  *
  */
 void

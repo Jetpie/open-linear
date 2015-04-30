@@ -217,22 +217,29 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
         cerr << "predict_all : Model not trained,  please train the model first!"
              << __FILE__ << "," << __LINE__ << endl;
     }
+    ifstream infile(input);
+    ofstream outfile(output,ios::out);
+    if(!outfile.is_open())
+    {
+        cerr << "predict_all : output file open error!"
+             << __FILE__ << "," << __LINE__ << endl;
 
+    }
     // initialize count for model evaluation
     size_t n_classes = lb->get_n_classes();
     vector<vector<size_t> > confusion_matrix(n_classes,vector<size_t>(n_classes));
     const vector<double> labels = lb->get_labels();
     std::map<double,size_t> label_index;
+    outfile << "labels";
     for(size_t i = 0;i < labels.size();++i)
     {
         label_index[labels[i]] = i;
+        outfile << " " << labels[i];
     }
+    outfile << "\n";
 
     //
     map<double,size_t>::iterator it = label_index.end();
-
-    ifstream infile(input);
-    ofstream outfile(output);
 
     double true_label, pred_label;
     size_t true_i,pred_i;
@@ -276,10 +283,15 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
         {
             vector<double> p;
             pred_label = lb->predict_proba(x,p);
+            outfile << pred_label;
+            for(size_t i = 0; i < n_classes;++i)
+                outfile << " " << p[i];
+            outfile << "\n";
         }
         else
         {
             pred_label = lb->predict(x);
+            outfile << pred_label << "\n";
         }
         // the labels is get from model, no safty problem
         pred_i = label_index[pred_label];
