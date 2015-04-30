@@ -14,7 +14,7 @@ class LogisticRegression : public LinearBase
 {
 public:
     LogisticRegression() : LinearBase(){};
-    LogisticRegression(ModelPtr model) : LinearBase(model){};
+    explicit LogisticRegression(ModelPtr model) : LinearBase(model){};
     ~LogisticRegression(void) {};
     void train(const DatasetPtr, const ParamPtr);
 };

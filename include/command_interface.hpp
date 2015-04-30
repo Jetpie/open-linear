@@ -15,11 +15,21 @@
 #include <fstream>
 #include <sstream>
 #include <set>
+#include <map>
+/**
+ * Print help information on stdout
+ *
+ */
 void print_help()
 {
     cout << "HELP" <<endl;
 }
 
+/**
+ * Parse command line arguments
+ *
+ *
+ */
 void parse_command_line(int argc, char** argv)
 {
 
@@ -29,10 +39,13 @@ void parse_command_line(int argc, char** argv)
  * Read dataset from file. An estimation of number of instance is better
  * to be given for better memory usage.
  *
- * @param filename
- * @param n_entries
- * @param dimension
+ * @param filename  input file name of dataset
+ * @param n_entries estimated number of entries of datasets. Will run as
+ *                  normal though not accurate but may cause memory error
+ *                  because no enough space is reserved.
+ * @param dimension dimension of feature space
  *
+ * @return shared_ptr to loaded dataset
  */
 DatasetPtr
 read_dataset(const string filename, const size_t dimension , const size_t n_entries = 1000)
@@ -47,7 +60,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     std::vector<Tri> triplets;
     triplets.reserve(n_entries);
 
-    // read throgh file;
+    // read through file;
     ifstream infile(filename);
     std::set<double> classes;
     for(string line; std::getline(infile,line);)
@@ -70,7 +83,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
         }
         ++n_samples;
     }
-
+    infile.close();
     // assign dataset model
     DatasetPtr dataset = make_shared<Dataset>();
     if(!dataset)
@@ -96,8 +109,14 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     return dataset;
 }
 
-
-ModelPtr load_model(const string filename)
+/*
+ * Load model from file. Fixed terms for each line
+ *
+ * @param filename inpute filename for model
+ *
+ * @return shared_ptr for Model
+ */
+ModelPtr load_model(const string& filename)
 {
     ModelPtr model = make_shared<Model>();
     // sanity check
@@ -180,8 +199,103 @@ ModelPtr load_model(const string filename)
             return NULL;
         }
     }
+    infile.close();
     return model;
 
+}
+
+/**
+ *
+ *
+ *
+ */
+void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
+                 bool flag_probability = false, size_t estimate_n = 100)
+{
+    if(!lb->is_trained())
+    {
+        cerr << "predict_all : Model not trained,  please train the model first!"
+             << __FILE__ << "," << __LINE__ << endl;
+    }
+
+    // initialize count for model evaluation
+    size_t n_classes = lb->get_n_classes();
+    vector<vector<size_t> > confusion_matrix(n_classes,vector<size_t>(n_classes));
+    const vector<double> labels = lb->get_labels();
+    std::map<double,size_t> label_index;
+    for(size_t i = 0;i < labels.size();++i)
+    {
+        label_index[labels[i]] = i;
+    }
+
+    //
+    map<double,size_t>::iterator it = label_index.end();
+
+    ifstream infile(input);
+    ofstream outfile(output);
+
+    double true_label, pred_label;
+    size_t true_i,pred_i;
+    double n_correct = 0,n_samples = 0;
+    FeatureVector x;
+    size_t max_n_feature = 0;
+
+    // read through file
+    for(string line; std::getline(infile,line);)
+    {
+        stringstream ss(line);
+        string item;
+        std::getline(ss,item,' ');
+        true_label = std::stod(item);
+        it = label_index.find(true_label);
+        if(it == label_index.end())
+        {
+            cout << "Warning: Unknown label(" << true_label
+                 << ") to model in file, jump over!";
+            // jump over
+            continue;
+        }
+        true_i = it->second;
+        max_n_feature = 0;
+        x.clear();
+        while(std::getline(ss,item,' '))
+        {
+            int i;
+            float v_ij;
+            sscanf(item.c_str(),"%d:%f",&i,&v_ij);
+            max_n_feature++;
+            if(max_n_feature > estimate_n)
+            {
+                estimate_n *= 2;
+                x.reserve(estimate_n);
+            }
+            x.push_back({(size_t) (i-1), v_ij});
+        }
+        // TODO: add check if model is a probability model
+        if(flag_probability)
+        {
+            vector<double> p;
+            pred_label = lb->predict_proba(x,p);
+        }
+        else
+        {
+            pred_label = lb->predict(x);
+        }
+        // the labels is get from model, no safty problem
+        pred_i = label_index[pred_label];
+        ++confusion_matrix[pred_i][true_i];
+
+
+        if(true_i == pred_i)
+            ++n_correct;
+        ++n_samples;
+    }
+    infile.close();
+    outfile.close();
+
+    double accuracy = (n_correct / n_samples) * 100;
+    printf("Prediction Accuracy : %.4f%%\n",accuracy);
+    return;
 }
 
 #endif //COMMAND_INTERFACE_H_

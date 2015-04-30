@@ -148,6 +148,7 @@ class LinearBase
 protected:
     // model instance
     ModelPtr model_;
+    bool trained_;
     // parameter instance
     ParamPtr parameter_;
     void predict_WTx(const FeatureVector, vector<double>&);
@@ -155,10 +156,13 @@ protected:
 public:
 
     LinearBase(void);
-    LinearBase(const ModelPtr);
+    explicit LinearBase(const ModelPtr);
     void load_model(const ModelPtr);
     virtual ~LinearBase(void){};
 
+    virtual bool is_trained();
+    virtual size_t get_n_classes();
+    virtual vector<double> get_labels();
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual double predict(const FeatureVector);
     virtual double predict_proba(const FeatureVector, vector<double>&);

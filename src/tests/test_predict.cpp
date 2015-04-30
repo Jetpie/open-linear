@@ -5,6 +5,7 @@ int main(int argc, char** argv)
 {
     std::cout.precision(10);
     string filename = "res/sample";
+    string output = "res/output";
     size_t dimension = 13;
     DatasetPtr dataset = read_dataset(filename,dimension,270);
 
@@ -16,7 +17,7 @@ int main(int argc, char** argv)
     {
         cout << W_[i] << endl;
     }
-    LogisticRegression lr(model);
+    shared_ptr<LinearBase> lr= make_shared<LogisticRegression>(model);
 
     // cout << *(dataset->X) << endl;
     cout << dataset->n_samples <<endl;
@@ -24,7 +25,7 @@ int main(int argc, char** argv)
     cout << dataset->n_classes << endl;
 
     cout << endl;
-    clock_t s;
+    //clock_t s;
     for(int k =0; k < (dataset->X)->outerSize(); ++k)
     {
         FeatureVector features;
@@ -36,17 +37,15 @@ int main(int argc, char** argv)
         }
         //cout << endl;
         vector<double> p;
-        s = clock();
-        double label = lr.predict_proba(features,p);
-        cout << "time test:" << float(clock() -s)/CLOCKS_PER_SEC << endl;
-        s = clock();
-        label = lr.predict(features);
-        cout << "time test:" << float(clock() -s)/CLOCKS_PER_SEC << endl;
+        //s = clock();
+        double label = lr->predict_proba(features,p);
+        //cout << "time test:" << float(clock() -s)/CLOCKS_PER_SEC << endl;
+        //s = clock();
+        label = lr->predict(features);
+        //cout << "time test:" << float(clock() -s)/CLOCKS_PER_SEC << endl;
         cout << "prediction for column " << k+1 << " : "
              << label << " " << p[0] << "," << p[1] << endl;
     }
-
-
-
+    predict_all(filename,output,lr);
 
 }

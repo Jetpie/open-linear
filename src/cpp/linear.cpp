@@ -10,7 +10,7 @@
 //
 // @license: See LICENSE at root directory
 #include "linear.hpp"
-LinearBase::LinearBase() : model_(NULL) {};
+LinearBase::LinearBase() : model_(NULL),trained_(false) {};
 LinearBase::LinearBase(const ModelPtr model)
 {
     load_model(model);
@@ -20,6 +20,22 @@ LinearBase::load_model(const ModelPtr model)
 {
     // TODO: add check of model
     this->model_ = model;
+    this->trained_ = true;
+}
+bool
+LinearBase::is_trained()
+{
+    return this->trained_;
+}
+size_t
+LinearBase::get_n_classes()
+{
+    return this->model_->n_classes;
+}
+vector<double>
+LinearBase::get_labels()
+{
+    return this->model_->labels;
 }
 
 /**
