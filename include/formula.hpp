@@ -21,25 +21,14 @@
 
 ///
 ///
-// class Formula
-// {
-// public:
-//     double sigmoid(double x)
-//     {
-//         return 1.0 / ( 1 + exp(x) );
-//     };
-// };
-
-///
-///
 class Problem
 {
 
 public:
     virtual ~Problem(void) {};
 
-    virtual double loss(const ColVector, const vector<double>) = 0;
-    virtual RowVector gradient(const ColVector, const vector<double>) = 0;
+    virtual double loss(const ColVector&, const vector<double>&) = 0;
+    virtual RowVector gradient(const ColVector&, const vector<double>&) = 0;
 
 };
 
@@ -57,11 +46,11 @@ private:
     RowVector g_;
 
 public:
-    L2R_LR_Problem(const DatasetPtr);
+    explicit L2R_LR_Problem(const DatasetPtr);
     ~L2R_LR_Problem();
 
-    double loss(const ColVector, const vector<double>);
-    RowVector gradient(const ColVector, const vector<double>);
-    ColMatrix hessian(const ColVector, const vector<double>);
+    double loss(const ColVector&, const vector<double>&);
+    RowVector gradient(const ColVector&, const vector<double>&);
+    ColMatrix hessian(const ColVector&, const vector<double>&);
 };
 #endif// FORMULA_H_

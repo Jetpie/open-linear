@@ -16,8 +16,15 @@
 class SolverBase
 {
 public:
+    explicit SolverBase(double eps, size_t max_epoch) :
+        eps_(eps), max_epoch_(max_epoch) {};
+
     virtual ~SolverBase();
-    virtual void solve(ProblemPtr) = 0;
+    virtual void solve(ProblemPtr, ColMatrix&) = 0;
+
+protected:
+    double eps_;
+    size_t max_epoch_;
 };
 
 /// Gradint descent optimizer
@@ -26,7 +33,7 @@ class GradientDescent: public SolverBase
 {
 public:
     ~GradientDescent();
-    void solve(ProblemPtr);
+    void solve(ProblemPtr, ColMatrix&);
 };
 
 /// Stochastic gradient descent optimizer
@@ -34,7 +41,7 @@ class StochasticGD: public SolverBase
 {
 public:
     ~StochasticGD();
-    void solve(ProblemPtr);
+    void solve(ProblemPtr, ColMatrix&);
 };
 
 /// Limited BFGS optimizer
@@ -42,7 +49,7 @@ class L_BFGS: public SolverBase
 {
 public:
     ~L_BFGS();
-    void solve(ProblemPtr);
+    void solve(ProblemPtr, ColMatrix&);
 };
 
 /// Newton conjugate gradient optimizer
@@ -50,7 +57,7 @@ class NewtonCG: public SolverBase
 {
 public:
     ~NewtonCG();
-    void solve(ProblemPtr);
+    void solve(ProblemPtr, ColMatrix&);
 };
 
 /// Newton trust region optimizer
@@ -64,6 +71,6 @@ class TRON: public SolverBase
 {
 public:
     ~TRON();
-    void solve(ProblemPtr);
+    void solve(ProblemPtr, ColMatrix&);
 };
 #endif// SOLVER_H_

@@ -23,8 +23,8 @@ int main(int argc, char** argv)
     cout << dataset->n_samples <<endl;
     cout << dataset->dimension << endl;
     cout << dataset->n_classes << endl;
-
     cout << endl;
+
     //clock_t s;
     for(int k =0; k < (dataset->X)->outerSize(); ++k)
     {
@@ -46,6 +46,7 @@ int main(int argc, char** argv)
         cout << "prediction for column " << k+1 << " : "
              << label << " " << p[0] << "," << p[1] << endl;
     }
-    predict_all(filename,output,lr);
+
+    predict_all(filename,output,lr,true);
 
 }

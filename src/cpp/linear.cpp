@@ -15,6 +15,12 @@ LinearBase::LinearBase(const ModelPtr model)
 {
     load_model(model);
 }
+
+/**
+ * To load a model from outside. The model will be validated
+ *
+ * @param model shared_ptr to Model instance
+ */
 void
 LinearBase::load_model(const ModelPtr model)
 {
@@ -22,16 +28,31 @@ LinearBase::load_model(const ModelPtr model)
     this->model_ = model;
     this->trained_ = true;
 }
+/**
+ * Return a state if the model parameter is trained
+ *
+ * @return true if the model is trained else false
+ */
 bool
 LinearBase::is_trained()
 {
     return this->trained_;
 }
+/**
+ * Getter for n_classes
+ *
+ * @return number of classes of model
+ */
 size_t
 LinearBase::get_n_classes()
 {
     return this->model_->n_classes;
 }
+/**
+ * Getter for labels
+ *
+ * @return vector of labels
+ */
 vector<double>
 LinearBase::get_labels()
 {
@@ -105,6 +126,7 @@ LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
 
     return;
 }
+
 /**
  * Compute the intermedient result of linear combination with input x
  * and model weights WTx

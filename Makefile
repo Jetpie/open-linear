@@ -1,7 +1,7 @@
 # ENV
 CC = g++
 # CC = clang --analyze # and comment out the linker last line for sanity
-EIGENROOT ?= /home/bingqingqu/user-libs/eigen-3.2.4
+EIGENROOT ?= $(HOME)/user-libs/eigen-3.2.4
 
 BIN_DIR := ./bin
 SRC_DIR := ./src
@@ -51,6 +51,6 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/cpp/%.cpp $(dirs)
 
 clean:
 	@echo "	Cleaning..."
-	@echo "	$(RM) -r $(OBJ_DIR) $(BIN_DIR)"; $(RM) -r $(OBJ_DIR) $(BIN_DIR)/*
+	@echo "	$(RM) -r $(OBJ_DIR) $(BIN_DIR)/*"; $(RM) -r $(OBJ_DIR) $(BIN_DIR)/*
 
 .PHONY: clean all

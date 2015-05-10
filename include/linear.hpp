@@ -105,7 +105,7 @@ struct Parameter
 /// The consideration here is firstly, the low level c++ array is though
 /// not safe in memory, I can validate the memory after training and
 /// once the double* is stored, no other manipulation should have
-/// previlige to modify it until it will be released by constructor.
+/// previlige to modify it until it will be released by destructor.
 /// All in all, the segmentation fault will not happen here under the
 /// help of class encapsulation.
 /// while secondly, the performance should have not much difference with

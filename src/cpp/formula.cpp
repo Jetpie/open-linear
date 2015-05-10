@@ -24,7 +24,7 @@
  *
  */
 double
-L2R_LR_Problem::loss(const ColVector w, const vector<double> C)
+L2R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
 {
     // loss value, initilization
     // l2-norm regularization term
@@ -51,7 +51,7 @@ L2R_LR_Problem::loss(const ColVector w, const vector<double> C)
  *
  */
 RowVector
-L2R_LR_Problem::gradient(const ColVector w, const vector<double> C)
+L2R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
 {
     size_t n_samples = dataset_->n_samples;
     vector<double> y = dataset_->y;
@@ -68,9 +68,3 @@ L2R_LR_Problem::gradient(const ColVector w, const vector<double> C)
 
     return grad;
 }
-
-/**
- *
- *
- *
- */

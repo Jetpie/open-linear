@@ -205,9 +205,16 @@ ModelPtr load_model(const string& filename)
 }
 
 /**
+ * Make prediction on all label and feature pairs of the input file.
+ * If the label is not valid in the model, the predictor will jump over.
+ * A confusion matrix can be recorded for evaluation.
  *
- *
- *
+ * @param input            input file path
+ * @param output           output file path
+ * @param lb               shared_ptr to a linear model
+ * @param flag_probability if print out the probabilities
+ * @param estimate_n       estimation of number of input feature.
+ *                         this will automatically be recomputed if exceeds.
  */
 void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
                  bool flag_probability = false, size_t estimate_n = 100)
@@ -225,10 +232,11 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
              << __FILE__ << "," << __LINE__ << endl;
 
     }
-    // initialize count for model evaluation
+
     size_t n_classes = lb->get_n_classes();
-    vector<vector<size_t> > confusion_matrix(n_classes,vector<size_t>(n_classes));
     const vector<double> labels = lb->get_labels();
+
+    // first line record all predictable labels
     std::map<double,size_t> label_index;
     outfile << "labels";
     for(size_t i = 0;i < labels.size();++i)
@@ -238,12 +246,18 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
     }
     outfile << "\n";
 
-    //
+    // initialize confusion matrix
+    vector<vector<size_t> > confusion_matrix(n_classes,vector<size_t>(n_classes));
+
+    // initialize iterator buffer to check if input label is valid
     map<double,size_t>::iterator it = label_index.end();
 
+    // buffers for label and index
     double true_label, pred_label;
     size_t true_i,pred_i;
-    double n_correct = 0,n_samples = 0;
+
+    double n_correct = 0, n_samples = 0;
+
     FeatureVector x;
     size_t max_n_feature = 0;
 
@@ -255,6 +269,8 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
         std::getline(ss,item,' ');
         true_label = std::stod(item);
         it = label_index.find(true_label);
+
+        // if true label is not known to model
         if(it == label_index.end())
         {
             cout << "Warning: Unknown label(" << true_label
@@ -263,6 +279,8 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
             continue;
         }
         true_i = it->second;
+
+        // flush the feature buffer
         max_n_feature = 0;
         x.clear();
         while(std::getline(ss,item,' '))
@@ -278,6 +296,7 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
             }
             x.push_back({(size_t) (i-1), v_ij});
         }
+
         // TODO: add check if model is a probability model
         if(flag_probability)
         {
@@ -293,10 +312,12 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
             pred_label = lb->predict(x);
             outfile << pred_label << "\n";
         }
+
         // the labels is get from model, no safty problem
         pred_i = label_index[pred_label];
-        ++confusion_matrix[pred_i][true_i];
 
+        // +1 for confusion matrix
+        ++confusion_matrix[pred_i][true_i];
 
         if(true_i == pred_i)
             ++n_correct;
@@ -307,6 +328,7 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
 
     double accuracy = (n_correct / n_samples) * 100;
     printf("Prediction Accuracy : %.4f%%\n",accuracy);
+
     return;
 }
 
