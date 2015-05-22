@@ -53,4 +53,23 @@ public:
     ColVector gradient(const ColVector&,const vector<double>&);
     ColMatrix hessian(const ColVector&, const vector<double>&);
 };
+
+/// L1-Regularized Loss Logistic Regression
+///
+class L1R_LR_Problem : public Problem
+{
+
+private:
+    const DatasetPtr dataset_;
+    /** g are some reusable part of the processes*/
+    ColVector g_;
+
+public:
+    explicit L1R_LR_Problem(const DatasetPtr);
+    ~L1R_LR_Problem();
+
+    double loss(const ColVector&,const vector<double>&);
+    ColVector gradient(const ColVector&,const vector<double>&);
+    ColMatrix hessian(const ColVector&, const vector<double>&);
+};
 #endif// FORMULA_H_

@@ -68,6 +68,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // dataset->X is read-only so no need for deep copy
 
     size_t k;
+    shared_ptr<Problem> problem;
     // handle two class classification problem
     if(n_classes == 2)
     {
@@ -78,12 +79,29 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         // rearrange labels
         size_t pos_end = start_idx[0] + count[0];
         for(k=0;k<pos_end;++k)
-            dataset->y[k] = dataset->labels[0];
+            dataset->y[k] = +1;
         for(;k<n_samples;++k)
-            dataset->y[k] = dataset->labels[1];
-
+            dataset->y[k] = -1;
         // make problem
-        shared_ptr<L2R_LR_Problem> problem = make_shared<L2R_LR_Problem>(dataset);
+        switch(param->solver)
+        {
+            case L1R_LR:
+            {
+                problem = make_shared<L1R_LR_Problem>(dataset);;
+                break;
+            }
+            case L2R_LR:
+            {
+                problem = make_shared<L2R_LR_Problem>(dataset);;
+                break;
+            }
+            default:
+                cerr << "LogisticRegression::train : invalid solver type, "
+                     << __FILE__ << "," << __LINE__ << endl;
+                break;
+        }
+
+
         GradientDescent gd;
         gd.solve(problem, param, w);
 

@@ -16,7 +16,73 @@
 // @license: See LICENSE at root directory
 #include "formula.hpp"
 
+/*********************************************************************
+ *                                  L1-Regularized Logistic Regression
+ *********************************************************************/
+L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
+{
+    g_ = ColVector(dataset->n_samples, 1);
+}
 
+L1R_LR_Problem::~L1R_LR_Problem(){}
+
+/**
+ * Compute the loss function of logistic regression
+ *
+ * @param w
+ * @param C
+ *
+ */
+double
+L1R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
+{
+    // loss value, initilization
+    // l1-norm regularization term
+    double f = w.lpNorm<1>();
+
+    size_t n_samples = dataset_->n_samples;
+    vector<double> y = dataset_->y;
+
+    // W^T X
+    g_ = w.transpose() * (*(dataset_->X));
+
+    // loss function : negative log likelihood
+    for(size_t i = 0; i < n_samples; ++i)
+        f += C[i] * log( 1 + exp(-y[i] * g_(i) ) );
+
+
+    return f;
+}
+
+/**
+ * Compute the gradient
+ *
+ *
+ */
+ColVector
+L1R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
+{
+    const size_t n_samples = dataset_->n_samples;
+    const vector<double> y = dataset_->y;
+
+    for(size_t i = 0; i < n_samples; ++i)
+    {
+        // h_w(y_i,x_i) - sigmoid function
+        g_(i) = 1 / ( 1 + exp( -y[i] * g_(i) ) );
+        // C * (h_w(y_i,x_i) - 1) * y[i]
+        g_(i) = C[i] * (g_(i) - 1) * y[i];
+
+    }
+
+    ColVector grad = (*(dataset_->X))*g_ + ColVector::Ones(dataset_->dimension,1);
+
+    return grad;
+}
+
+
+/*********************************************************************
+ *                                  L2-Regularized Logistic Regression
+ *********************************************************************/
 L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
 {
     g_ = ColVector(dataset->n_samples, 1);

@@ -10,13 +10,13 @@ int main(int argc, char** argv)
     DatasetPtr dataset = read_dataset(filename,dimension,270);
 
     ParamPtr param = make_shared<Parameter>();
-    param->solver = 0;
+    param->solver = 1;
     param->formula = 0;
     param->bias = 0.001;
     param->rela_tol = 0.00001;
     param->abs_tol = 0.00001;
     param->max_epoch = 500;
-    param->lambda = 0.1;
+    param->lambda = 0.01;
 
     vector<double> C(dataset->n_samples,1.);
 
