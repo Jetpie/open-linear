@@ -27,8 +27,8 @@ class Problem
 public:
     virtual ~Problem(void) {};
 
-    virtual double loss(const ColVector&, const vector<double>&) = 0;
-    virtual RowVector gradient(const ColVector&, const vector<double>&) = 0;
+    virtual double loss(const ColVector&,const vector<double>&) = 0;
+    virtual ColVector gradient(const ColVector&,const vector<double>&) = 0;
 
 };
 
@@ -43,14 +43,14 @@ class L2R_LR_Problem : public Problem
 private:
     const DatasetPtr dataset_;
     /** g are some reusable part of the processes*/
-    RowVector g_;
+    ColVector g_;
 
 public:
     explicit L2R_LR_Problem(const DatasetPtr);
     ~L2R_LR_Problem();
 
-    double loss(const ColVector&, const vector<double>&);
-    RowVector gradient(const ColVector&, const vector<double>&);
+    double loss(const ColVector&,const vector<double>&);
+    ColVector gradient(const ColVector&,const vector<double>&);
     ColMatrix hessian(const ColVector&, const vector<double>&);
 };
 #endif// FORMULA_H_

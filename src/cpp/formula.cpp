@@ -16,6 +16,14 @@
 // @license: See LICENSE at root directory
 #include "formula.hpp"
 
+
+L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
+{
+    g_ = ColVector(dataset->n_samples, 1);
+}
+
+L2R_LR_Problem::~L2R_LR_Problem(){}
+
 /**
  * Compute the loss function of logistic regression
  *
@@ -36,12 +44,11 @@ L2R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
     // W^T X
     g_ = w.transpose() * (*(dataset_->X));
 
+    // loss function : negative log likelihood
     for(size_t i = 0; i < n_samples; ++i)
-    {
-        double ywTX = y[i] * g_(i);
-        // loss function : negative log likelihood
-        f += C[i] * log( 1 + exp(-ywTX) );
-    }
+        f += C[i] * log( 1 + exp(-y[i] * g_(i) ) );
+
+
     return f;
 }
 
@@ -50,11 +57,11 @@ L2R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
  *
  *
  */
-RowVector
+ColVector
 L2R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
 {
-    size_t n_samples = dataset_->n_samples;
-    vector<double> y = dataset_->y;
+    const size_t n_samples = dataset_->n_samples;
+    const vector<double> y = dataset_->y;
 
     for(size_t i = 0; i < n_samples; ++i)
     {
@@ -62,9 +69,10 @@ L2R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
         g_(i) = 1 / ( 1 + exp( -y[i] * g_(i) ) );
         // C * (h_w(y_i,x_i) - 1) * y[i]
         g_(i) = C[i] * (g_(i) - 1) * y[i];
+
     }
-    ColVector grad = (*(dataset_->X)) * g_;
-    grad += w;
+
+    ColVector grad = (*(dataset_->X)) * g_ + w;
 
     return grad;
 }

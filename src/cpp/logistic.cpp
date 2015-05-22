@@ -5,8 +5,8 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-
 #include "logistic.hpp"
+#include "solver.hpp"
 
 /**
  * Train the coefficients using depends on the parameters.
@@ -37,7 +37,6 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
 
     model->bias = param->bias;
     model->dimension = dimension;
-    model->labels = dataset->labels;
     model->n_classes = n_classes;
 
     vector<size_t> count;
@@ -51,6 +50,8 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // in advance
     if(n_classes==2 && dataset->labels[0] == -1 && dataset->labels[1] == 1)
         std::swap(dataset->labels[0],dataset->labels[1]);
+
+    model->labels = dataset->labels;
 
     // preprocess the training dataset
     preprocess_data(dataset, count, start_idx, perm_idx);
@@ -66,20 +67,49 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // make copy of dataset for training
     // dataset->X is read-only so no need for deep copy
 
-
+    size_t k;
     // handle two class classification problem
     if(n_classes == 2)
     {
-        ColMatrixPtr W = make_shared<ColMatrix>(dimension,1);
+        // initialize weights to -0.5 ~ 0.5
+        srand((unsigned int) time(0));
+        ColVector w = ColVector::Random(dimension,1) / 2;
+
+        // rearrange labels
+        size_t pos_end = start_idx[0] + count[0];
+        for(k=0;k<pos_end;++k)
+            dataset->y[k] = dataset->labels[0];
+        for(;k<n_samples;++k)
+            dataset->y[k] = dataset->labels[1];
+
+        // make problem
+        shared_ptr<L2R_LR_Problem> problem = make_shared<L2R_LR_Problem>(dataset);
+        GradientDescent gd;
+        gd.solve(problem, param, w);
+
+        double* W_ = new double[w.rows()*w.cols()];
+        for(int i = 0; i < w.rows();++i)
+        {
+            for(int j = 0; j < w.cols(); ++j)
+            {
+                W_[i * w.cols() + j] = w(i,j);
+            }
+        }
+
+        // load parameter pointer into model, this is good practice if
+        // this is production environment, in which read and write
+        // manipulations are quite sensitive.
+        model->W_ = W_;
     }
     else
     {
+        cout << ">2classes" << endl;
     }
 
     // TODO: add training function calls
-    // TODO: convert W to model weights model->W_
 
 
+    this->trained_ = 1;
     // Finally, pass model variable to member model
     this->model_ = model;
 

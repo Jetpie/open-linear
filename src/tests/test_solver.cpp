@@ -1,5 +1,6 @@
 #include "solver.hpp"
-
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 
 int main()
 {
@@ -99,5 +100,33 @@ int main()
     start = clock();
     RowVector res2 =  spm * den_row_vec.transpose() ;
     cout << "time test:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
+    cout << res2  <<endl;
+    cout << res2 * 0.0001 <<endl;
+
+    // Sparse by Dense Test
+    cout << ">>>>>>>>>>Sparse Matrix By Dense Vector<<<<<<<<<<"<<endl;
+    SpColMatrix l_m(10,10);
+    for(size_t i = 0;i < 10;++i)
+        for(size_t j=0;j < 10; ++j)
+            l_m.coeffRef(i,j) = i*j;
+    ColVector r_v = ColVector::Ones(10,1);
+    cout << "l_m" << endl;
+    cout << l_m << endl;
+    cout << "r_v" << endl;
+    cout << r_v << endl;
+    ColVector result_mv = l_m * r_v;
+    cout << "result" << endl;
+    cout << result_mv << endl;
+
+    // Random Test
+    cout << ">>>>>>>>>>Random Test<<<<<<<<<<"<<endl;
+
+    for(int i = 0; i < 5; i++) {
+        srand((unsigned int) time(0));
+        std::this_thread::sleep_for (std::chrono::seconds(1));
+        ColMatrix A = ColMatrix::Random(3, 3) / 2;
+        cout << A <<endl;
+    }
+
 
 }

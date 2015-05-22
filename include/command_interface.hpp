@@ -235,7 +235,6 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
 
     size_t n_classes = lb->get_n_classes();
     const vector<double> labels = lb->get_labels();
-
     // first line record all predictable labels
     std::map<double,size_t> label_index;
     outfile << "labels";
@@ -245,7 +244,6 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
         outfile << " " << labels[i];
     }
     outfile << "\n";
-
     // initialize confusion matrix
     vector<vector<size_t> > confusion_matrix(n_classes,vector<size_t>(n_classes));
 
@@ -318,7 +316,7 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
 
         // +1 for confusion matrix
         ++confusion_matrix[pred_i][true_i];
-
+        // cout << "pred_i " << pred_i <<" true_i " << true_i << endl;
         if(true_i == pred_i)
             ++n_correct;
         ++n_samples;

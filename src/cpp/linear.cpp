@@ -89,10 +89,10 @@ LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
     // set all counts to 0s
     count.assign(n_classes,0);
 
-    // index for each class target (0...n)
+    // class index for each sample (0...n_samples)
     vector<size_t> index;
     index.reserve(n_samples);
-    for(size_t i=0; i < n_samples; ++i)
+    for(i=0; i < n_samples; ++i)
     {
         double label = dataset->y[i];
         for(j=0; j<n_classes; ++j)
@@ -213,7 +213,7 @@ LinearBase::predict_proba(FeatureVector x, vector<double>& probability)
     predict_WTx(x, probability);
 
     // initialize label
-    double label = -1.;
+    double label = 0;
     size_t i;
     if(model_->n_classes==2)
     {

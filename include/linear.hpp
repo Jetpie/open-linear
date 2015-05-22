@@ -89,8 +89,17 @@ struct Parameter
     int solver;
     /** define the objective function for solving */
     int formula;
-    /** tolerance for training stop criteria */
-    double tolerance;
+    /**
+     * relative tolerance between two continuous iterations
+     * for training stop criteria
+     */
+    double rela_tol;
+    /** absolute loss tolerance for iterative method */
+    double abs_tol;
+    /** learning rate for iterative method */
+    double lambda;
+    /** maximum iteration for iterative method */
+    size_t max_epoch;
     /** C */
     vector<double> C;
     double bias;
@@ -105,7 +114,7 @@ struct Parameter
 /// The consideration here is firstly, the low level c++ array is though
 /// not safe in memory, I can validate the memory after training and
 /// once the double* is stored, no other manipulation should have
-/// previlige to modify it until it will be released by destructor.
+/// previlige to modify it until it will be released by constructor.
 /// All in all, the segmentation fault will not happen here under the
 /// help of class encapsulation.
 /// while secondly, the performance should have not much difference with
@@ -137,7 +146,6 @@ typedef vector<FeatureNode> FeatureVector;
 typedef shared_ptr<Model> ModelPtr;
 typedef shared_ptr<Parameter> ParamPtr;
 typedef shared_ptr<Dataset> DatasetPtr;
-
 
 /// Base class for linear models
 ///
