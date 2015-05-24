@@ -1,4 +1,4 @@
-// Command interfaces
+// High-level functions
 //
 // @author: Bingqing Qu
 //
@@ -16,24 +16,6 @@
 #include <sstream>
 #include <set>
 #include <map>
-/**
- * Print help information on stdout
- *
- */
-void print_help()
-{
-    cout << "HELP" <<endl;
-}
-
-/**
- * Parse command line arguments
- *
- *
- */
-void parse_command_line(int argc, char** argv)
-{
-
-}
 
 /**
  * Read dataset from file. An estimation of number of instance is better
