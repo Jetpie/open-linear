@@ -86,9 +86,9 @@ enum SolverType
 struct Parameter
 {
     /** define the solver type for training model */
-    int solver;
+    int solver_type;
     /** define the objective function for solving */
-    int formula;
+    int problem_type;
     /**
      * relative tolerance between two continuous iterations
      * for training stop criteria

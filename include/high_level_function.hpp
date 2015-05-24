@@ -5,8 +5,8 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#ifndef COMMAND_INTERFACE_H_
-#define COMMAND_INTERFACE_H_
+#ifndef HIGH_LEVEL_FUNCTION_H_
+#define HIGH_LEVEL_FUNCTION_H_
 
 #include "linear.hpp"
 
@@ -330,4 +330,4 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
     return;
 }
 
-#endif //COMMAND_INTERFACE_H_
+#endif //HIGH_LEVEL_FUNCTION_H_

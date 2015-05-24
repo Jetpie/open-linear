@@ -69,6 +69,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
 
     size_t k;
     shared_ptr<Problem> problem;
+    shared_ptr<SolverBase> solver;
     // handle two class classification problem
     if(n_classes == 2)
     {
@@ -83,16 +84,29 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         for(;k<n_samples;++k)
             dataset->y[k] = -1;
         // make problem
-        switch(param->solver)
+        switch(param->problem_type)
         {
             case L1R_LR:
             {
-                problem = make_shared<L1R_LR_Problem>(dataset);;
+                problem = make_shared<L1R_LR_Problem>(dataset);
                 break;
             }
             case L2R_LR:
             {
-                problem = make_shared<L2R_LR_Problem>(dataset);;
+                problem = make_shared<L2R_LR_Problem>(dataset);
+                break;
+            }
+            default:
+                cerr << "LogisticRegression::train : invalid problem type, "
+                     << __FILE__ << "," << __LINE__ << endl;
+                break;
+        }
+        // decide solver
+        switch(param->solver_type)
+        {
+            case GD:
+            {
+                solver = make_shared<GradientDescent>();
                 break;
             }
             default:
@@ -100,10 +114,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
                      << __FILE__ << "," << __LINE__ << endl;
                 break;
         }
-
-
-        GradientDescent gd;
-        gd.solve(problem, param, w);
+        solver->solve(problem, param, w);
 
         double* W_ = new double[w.rows()*w.cols()];
         for(int i = 0; i < w.rows();++i)
@@ -124,9 +135,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         cout << ">2classes" << endl;
     }
 
-    // TODO: add training function calls
-
-
+    // flip the training flag
     this->trained_ = 1;
     // Finally, pass model variable to member model
     this->model_ = model;

@@ -1,4 +1,4 @@
-#include "command_interface.hpp"
+#include "high_level_function.hpp"
 #include "logistic.hpp"
 
 int main(int argc, char** argv)

@@ -1,4 +1,4 @@
-#include "command_interface.hpp"
+#include "high_level_function.hpp"
 #include "logistic.hpp"
 
 int main(int argc, char** argv)
@@ -10,8 +10,8 @@ int main(int argc, char** argv)
     DatasetPtr dataset = read_dataset(filename,dimension,270);
 
     ParamPtr param = make_shared<Parameter>();
-    param->solver = 1;
-    param->formula = 0;
+    param->solver_type = 0;
+    param->problem_type = 0;
     param->bias = 0.001;
     param->rela_tol = 0.00001;
     param->abs_tol = 0.00001;
