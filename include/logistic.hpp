@@ -9,6 +9,8 @@
 #define LOGISTIC_H_
 
 #include "linear.hpp"
+#include "solver.hpp"
+namespace oplin{
 
 class LogisticRegression : public LinearBase
 {
@@ -18,5 +20,8 @@ public:
     ~LogisticRegression(void) {};
     void train(const DatasetPtr, const ParamPtr);
 };
+
+} // namespace oplin
+
 
 #endif //LOGISTIC_H_

@@ -17,6 +17,12 @@
 #include <set>
 #include <map>
 
+namespace oplin{
+using std::cout;
+using std::endl;
+using std::cerr;
+using std::string;
+
 /**
  * Read dataset from file. An estimation of number of instance is better
  * to be given for better memory usage.
@@ -34,7 +40,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
 {
     //
     size_t n_samples = 0;
-    vector<double> y;
+    std::vector<double> y;
     y.reserve(n_entries);
 
     // vector to store Triplets to construct sparse matrix
@@ -43,11 +49,11 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     triplets.reserve(n_entries);
 
     // read through file;
-    ifstream infile(filename);
+    std::ifstream infile(filename);
     std::set<double> classes;
     for(string line; std::getline(infile,line);)
     {
-        stringstream ss(line);
+        std::stringstream ss(line);
         string item;
         std::getline(ss,item,' ');
         double label = std::stod(item);
@@ -67,7 +73,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     }
     infile.close();
     // assign dataset model
-    DatasetPtr dataset = make_shared<Dataset>();
+    DatasetPtr dataset = std::make_shared<Dataset>();
     if(!dataset)
     {
         cerr << "read_dataset : DatasetPtr allocation failed!"
@@ -76,9 +82,9 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     dataset->n_samples = n_samples;
     dataset->n_classes = classes.size();
     dataset->dimension = dimension;
-    dataset->labels = vector<double>(classes.begin(),classes.end());
+    dataset->labels = std::vector<double>(classes.begin(),classes.end());
     dataset->y = y;
-    dataset->X = make_shared<SpColMatrix>(dimension,n_samples);
+    dataset->X = std::make_shared<SpColMatrix>(dimension,n_samples);
     if(!dataset->X)
     {
         cerr << "read_dataset : SpColMatrixPtr allocation failed!"
@@ -100,7 +106,7 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
  */
 ModelPtr load_model(const string& filename)
 {
-    ModelPtr model = make_shared<Model>();
+    ModelPtr model = std::make_shared<Model>();
     // sanity check
     if(!model)
     {
@@ -108,11 +114,11 @@ ModelPtr load_model(const string& filename)
              << __FILE__ << "," << __LINE__ << endl;
     }
 
-    ifstream infile(filename);
+    std::ifstream infile(filename);
 
     for(string line; std::getline(infile,line);)
     {
-        stringstream ss(line);
+        std::stringstream ss(line);
         string item;
         // get content indicator
         std::getline(ss,item,' ');
@@ -159,7 +165,7 @@ ModelPtr load_model(const string& filename)
             for(size_t i =0;i < model->dimension; ++i)
             {
                 std::getline(infile,line);
-                stringstream ss(line);
+                std::stringstream ss(line);
                 string item;
                 for(size_t j =0; j < cols; ++j)
                 {
@@ -198,7 +204,7 @@ ModelPtr load_model(const string& filename)
  * @param estimate_n       estimation of number of input feature.
  *                         this will automatically be recomputed if exceeds.
  */
-void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
+void predict_all(string& input, string& output, std::shared_ptr<LinearBase> lb,
                  bool flag_probability = false, size_t estimate_n = 100)
 {
     if(!lb->is_trained())
@@ -206,8 +212,8 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
         cerr << "predict_all : Model not trained,  please train the model first!"
              << __FILE__ << "," << __LINE__ << endl;
     }
-    ifstream infile(input);
-    ofstream outfile(output,ios::out);
+    std::ifstream infile(input);
+    std::ofstream outfile(output,std::ios::out);
     if(!outfile.is_open())
     {
         cerr << "predict_all : output file open error!"
@@ -216,7 +222,7 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
     }
 
     size_t n_classes = lb->get_n_classes();
-    const vector<double> labels = lb->get_labels();
+    const std::vector<double> labels = lb->get_labels();
     // first line record all predictable labels
     std::map<double,size_t> label_index;
     outfile << "labels";
@@ -227,10 +233,10 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
     }
     outfile << "\n";
     // initialize confusion matrix
-    vector<vector<size_t> > confusion_matrix(n_classes,vector<size_t>(n_classes));
+    std::vector<std::vector<size_t> > confusion_matrix(n_classes,std::vector<size_t>(n_classes));
 
     // initialize iterator buffer to check if input label is valid
-    map<double,size_t>::iterator it = label_index.end();
+    std::map<double,size_t>::iterator it = label_index.end();
 
     // buffers for label and index
     double true_label, pred_label;
@@ -244,7 +250,7 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
     // read through file
     for(string line; std::getline(infile,line);)
     {
-        stringstream ss(line);
+        std::stringstream ss(line);
         string item;
         std::getline(ss,item,' ');
         true_label = std::stod(item);
@@ -280,7 +286,7 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
         // TODO: add check if model is a probability model
         if(flag_probability)
         {
-            vector<double> p;
+            std::vector<double> p;
             pred_label = lb->predict_proba(x,p);
             outfile << pred_label;
             for(size_t i = 0; i < n_classes;++i)
@@ -312,4 +318,5 @@ void predict_all(string& input, string& output, shared_ptr<LinearBase> lb,
     return;
 }
 
+} // oplin
 #endif //HIGH_LEVEL_FUNCTION_H_

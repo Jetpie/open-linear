@@ -10,6 +10,13 @@
 //
 // @license: See LICENSE at root directory
 #include "linear.hpp"
+
+namespace oplin{
+using std::cout;
+using std::cerr;
+using std::endl;
+using namespace Eigen;
+
 LinearBase::LinearBase() : model_(NULL),trained_(false) {};
 LinearBase::LinearBase(const ModelPtr model)
 {
@@ -53,7 +60,7 @@ LinearBase::get_n_classes()
  *
  * @return vector of labels
  */
-vector<double>
+std::vector<double>
 LinearBase::get_labels()
 {
     return this->model_->labels;
@@ -69,8 +76,8 @@ LinearBase::get_labels()
  *
  */
 void
-LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
-                            vector<size_t>& start_idx, vector<size_t>& perm_idx)
+LinearBase::preprocess_data(const DatasetPtr dataset, std::vector<size_t>& count,
+                            std::vector<size_t>& start_idx, std::vector<size_t>& perm_idx)
 {
     size_t n_samples = dataset->n_samples;
     size_t n_classes = dataset->n_classes;
@@ -90,7 +97,7 @@ LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
     count.assign(n_classes,0);
 
     // class index for each sample (0...n_samples)
-    vector<size_t> index;
+    std::vector<size_t> index;
     index.reserve(n_samples);
     for(i=0; i < n_samples; ++i)
     {
@@ -137,7 +144,7 @@ LinearBase::preprocess_data(const DatasetPtr dataset, vector<size_t>& count,
  * @return label of current prediction
  */
 void
-LinearBase::predict_WTx(FeatureVector x, vector<double>& WTx)
+LinearBase::predict_WTx(FeatureVector x, std::vector<double>& WTx)
 {
     // no WTx valdation is need as this method is encapsulated to outside.
     //
@@ -150,7 +157,7 @@ LinearBase::predict_WTx(FeatureVector x, vector<double>& WTx)
     // weights for current feature dimension
     double* cur_w;
     // compute W^T x
-    for(vector<FeatureNode>::iterator it=x.begin(); it!=x.end(); ++it)
+    for(std::vector<FeatureNode>::iterator it=x.begin(); it!=x.end(); ++it)
     {
         cur_w = &w[(it->i) *n_ws];
         for(i=0; i<n_ws; ++i)
@@ -175,7 +182,7 @@ double
 LinearBase::predict(FeatureVector x)
 {
     // initialize WTx by size
-    vector<double> WTx(model_->n_classes);
+    std::vector<double> WTx(model_->n_classes);
     predict_WTx(x, WTx);
     size_t i;
     // threshold 0 for binary classification
@@ -204,12 +211,12 @@ LinearBase::predict(FeatureVector x)
  * @return label of current prediction
  */
 double
-LinearBase::predict_proba(FeatureVector x, vector<double>& probability)
+LinearBase::predict_proba(FeatureVector x, std::vector<double>& probability)
 {
 
     // use the swap trick here. will validate the benchmark later
     // TODO: validate swap trick here
-    vector<double>(model_->n_classes).swap(probability);
+    std::vector<double>(model_->n_classes).swap(probability);
     predict_WTx(x, probability);
 
     // initialize label
@@ -242,3 +249,5 @@ LinearBase::predict_proba(FeatureVector x, vector<double>& probability)
 
     return label;
 }
+
+} // oplin

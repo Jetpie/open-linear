@@ -6,8 +6,12 @@
 //
 // @license: See LICENSE at root directory
 #include "logistic.hpp"
-#include "solver.hpp"
 
+namespace oplin{
+using std::cout;
+using std::endl;
+using std::cerr;
+using namespace Eigen;
 /**
  * Train the coefficients using depends on the parameters.
  *
@@ -31,7 +35,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     size_t n_classes = dataset->n_classes;
 
     // initialize model
-    ModelPtr model = make_shared<Model>();
+    ModelPtr model = std::make_shared<Model>();
     // sanity check
     assert(model);
 
@@ -39,9 +43,9 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     model->dimension = dimension;
     model->n_classes = n_classes;
 
-    vector<size_t> count;
-    vector<size_t> start_idx;
-    vector<size_t> perm_idx;
+    std::vector<size_t> count;
+    std::vector<size_t> start_idx;
+    std::vector<size_t> perm_idx;
     count.reserve(n_classes);
     start_idx.reserve(n_classes);
     perm_idx.reserve(n_samples);
@@ -68,8 +72,8 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // dataset->X is read-only so no need for deep copy
 
     size_t k;
-    shared_ptr<Problem> problem;
-    shared_ptr<SolverBase> solver;
+    std::shared_ptr<Problem> problem;
+    std::shared_ptr<SolverBase> solver;
     // handle two class classification problem
     if(n_classes == 2)
     {
@@ -88,12 +92,12 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         {
             case L1R_LR:
             {
-                problem = make_shared<L1R_LR_Problem>(dataset);
+                problem = std::make_shared<L1R_LR_Problem>(dataset);
                 break;
             }
             case L2R_LR:
             {
-                problem = make_shared<L2R_LR_Problem>(dataset);
+                problem = std::make_shared<L2R_LR_Problem>(dataset);
                 break;
             }
             default:
@@ -106,7 +110,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         {
             case GD:
             {
-                solver = make_shared<GradientDescent>();
+                solver = std::make_shared<GradientDescent>();
                 break;
             }
             default:
@@ -165,3 +169,5 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // }
     // cout << endl;
 }
+
+} // oplin

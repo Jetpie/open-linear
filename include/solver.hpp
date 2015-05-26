@@ -9,6 +9,7 @@
 #define SOLVER_H_
 #include "linear.hpp"
 #include "formula.hpp"
+namespace oplin{
 
 /// Base class for solvers
 ///
@@ -66,4 +67,7 @@ public:
     ~TRON();
     void solve(ProblemPtr, ParamPtr, ColVector&);
 };
+
+} // oplin
+// using namespace oplin::solver;
 #endif// SOLVER_H_

@@ -1,6 +1,8 @@
 #include "high_level_function.hpp"
 #include "logistic.hpp"
-
+using namespace oplin;
+using namespace std;
+using namespace Eigen;
 int main(int argc, char** argv)
 {
     string filename = "res/sample";

@@ -15,7 +15,11 @@
 //
 // @license: See LICENSE at root directory
 #include "formula.hpp"
-
+namespace oplin{
+using std::cout;
+using std::endl;
+using std::cerr;
+using namespace Eigen;
 /*********************************************************************
  *                                  L1-Regularized Logistic Regression
  *********************************************************************/
@@ -34,14 +38,14 @@ L1R_LR_Problem::~L1R_LR_Problem(){}
  *
  */
 double
-L1R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
+L1R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
 {
     // loss value, initilization
     // l1-norm regularization term
     double f = w.lpNorm<1>();
 
     size_t n_samples = dataset_->n_samples;
-    vector<double> y = dataset_->y;
+    std::vector<double> y = dataset_->y;
 
     // W^T X
     g_ = w.transpose() * (*(dataset_->X));
@@ -60,10 +64,10 @@ L1R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
  *
  */
 ColVector
-L1R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
+L1R_LR_Problem::gradient(const ColVector& w, const std::vector<double>& C)
 {
     const size_t n_samples = dataset_->n_samples;
-    const vector<double> y = dataset_->y;
+    const std::vector<double> y = dataset_->y;
 
     for(size_t i = 0; i < n_samples; ++i)
     {
@@ -98,14 +102,14 @@ L2R_LR_Problem::~L2R_LR_Problem(){}
  *
  */
 double
-L2R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
+L2R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
 {
     // loss value, initilization
     // l2-norm regularization term
     double f = w.squaredNorm() / 2.0;
 
     size_t n_samples = dataset_->n_samples;
-    vector<double> y = dataset_->y;
+    std::vector<double> y = dataset_->y;
 
     // W^T X
     g_ = w.transpose() * (*(dataset_->X));
@@ -124,10 +128,10 @@ L2R_LR_Problem::loss(const ColVector& w, const vector<double>& C)
  *
  */
 ColVector
-L2R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
+L2R_LR_Problem::gradient(const ColVector& w, const std::vector<double>& C)
 {
     const size_t n_samples = dataset_->n_samples;
-    const vector<double> y = dataset_->y;
+    const std::vector<double> y = dataset_->y;
 
     for(size_t i = 0; i < n_samples; ++i)
     {
@@ -142,3 +146,5 @@ L2R_LR_Problem::gradient(const ColVector& w, const vector<double>& C)
 
     return grad;
 }
+
+} // oplin

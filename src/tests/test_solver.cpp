@@ -1,7 +1,9 @@
-#include "solver.hpp"
+#include "linear.hpp"
 #include <thread>         // std::this_thread::sleep_for
 #include <chrono>         // std::chrono::seconds
-
+using namespace oplin;
+using namespace std;
+using namespace Eigen;
 int main()
 {
     MatrixXf m(3,3);

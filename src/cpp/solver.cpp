@@ -1,5 +1,10 @@
 #include "solver.hpp"
 
+namespace oplin{
+using std::cout;
+using std::endl;
+using std::cerr;
+using namespace Eigen;
 SolverBase::~SolverBase(){}
 GradientDescent::~GradientDescent(){}
 
@@ -32,3 +37,5 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, ColVector& w)
         ++epoch;
     }
 }
+
+} // oplin

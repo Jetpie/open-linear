@@ -19,6 +19,8 @@
 
 #include "linear.hpp"
 
+namespace oplin{
+
 ///
 ///
 class Problem
@@ -27,8 +29,8 @@ class Problem
 public:
     virtual ~Problem(void) {};
 
-    virtual double loss(const ColVector&,const vector<double>&) = 0;
-    virtual ColVector gradient(const ColVector&,const vector<double>&) = 0;
+    virtual double loss(const ColVector&, const std::vector<double>&) = 0;
+    virtual ColVector gradient(const ColVector&, const std::vector<double>&) = 0;
 
 };
 
@@ -49,9 +51,9 @@ public:
     explicit L2R_LR_Problem(const DatasetPtr);
     ~L2R_LR_Problem();
 
-    double loss(const ColVector&,const vector<double>&);
-    ColVector gradient(const ColVector&,const vector<double>&);
-    ColMatrix hessian(const ColVector&, const vector<double>&);
+    double loss(const ColVector&,const std::vector<double>&);
+    ColVector gradient(const ColVector&,const std::vector<double>&);
+    ColMatrix hessian(const ColVector&, const std::vector<double>&);
 };
 
 /// L1-Regularized Loss Logistic Regression
@@ -68,8 +70,11 @@ public:
     explicit L1R_LR_Problem(const DatasetPtr);
     ~L1R_LR_Problem();
 
-    double loss(const ColVector&,const vector<double>&);
-    ColVector gradient(const ColVector&,const vector<double>&);
-    ColMatrix hessian(const ColVector&, const vector<double>&);
+    double loss(const ColVector&,const std::vector<double>&);
+    ColVector gradient(const ColVector&,const std::vector<double>&);
+    ColMatrix hessian(const ColVector&, const std::vector<double>&);
 };
+
+} // oplin
+
 #endif// FORMULA_H_

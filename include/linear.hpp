@@ -26,28 +26,23 @@
 #include <algorithm>
 #include <Eigen/SparseCore>
 #include <Eigen/Core>
-using namespace std;
-using namespace Eigen;
+
+namespace oplin{
 
 // Define Eigen vector and matrix types we will use
-typedef Eigen::SparseMatrix<double, RowMajor> SpRowMatrix;
-typedef Eigen::SparseMatrix<double, ColMajor> SpColMatrix;
-typedef Eigen::SparseVector<double, RowMajor> SpRowVector;
-typedef Eigen::SparseVector<double, ColMajor> SpColVector;
-typedef Eigen::Matrix<double, Dynamic, 1      , ColMajor> ColVector;
-typedef Eigen::Matrix<double, 1      , Dynamic, RowMajor> RowVector;
-typedef Eigen::Matrix<double, Dynamic, Dynamic, RowMajor> RowMatrix;
-typedef Eigen::Matrix<double, Dynamic, Dynamic, ColMajor> ColMatrix;
+typedef Eigen::SparseMatrix<double, Eigen::RowMajor> SpRowMatrix;
+typedef Eigen::SparseMatrix<double, Eigen::ColMajor> SpColMatrix;
+typedef Eigen::SparseVector<double, Eigen::RowMajor> SpRowVector;
+typedef Eigen::SparseVector<double, Eigen::ColMajor> SpColVector;
+typedef Eigen::Matrix<double, Eigen::Dynamic, 1      , Eigen::ColMajor> ColVector;
+typedef Eigen::Matrix<double, 1      , Eigen::Dynamic, Eigen::RowMajor> RowVector;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> RowMatrix;
+typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> ColMatrix;
 
 // smart pointers
 typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
 
-struct FeatureNode
-{
-    size_t i;
-    double v;
-};
 /// Dataset parameters
 struct Dataset
 {
@@ -58,9 +53,9 @@ struct Dataset
     /** feature dimension */
     size_t dimension;
     /** targets */
-    vector<double> y;
+    std::vector<double> y;
     /** target labels */
-    vector<double> labels;
+    std::vector<double> labels;
     /**
      * features w.r.t order of y
      * dimension is dimension * n_samples
@@ -101,10 +96,17 @@ struct Parameter
     /** maximum iteration for iterative method */
     size_t max_epoch;
     /** C */
-    vector<double> C;
+    std::vector<double> C;
     double bias;
 };
+typedef std::shared_ptr<Parameter> ParamPtr;
+typedef std::shared_ptr<Dataset> DatasetPtr;
 
+struct FeatureNode
+{
+    size_t i;
+    double v;
+};
 /// Model Parameters
 ///
 /// An important note here is the key part of model - weights:
@@ -132,7 +134,7 @@ struct Model
     /** define a bias, 0 if no bias setting */
     double bias;
     /** labels of classes */
-    vector<double> labels;
+    std::vector<double> labels;
     // destructor must be called for double*
     ~Model()
     {
@@ -141,11 +143,10 @@ struct Model
 
 };
 
-typedef vector<FeatureNode> FeatureVector;
+typedef std::vector<FeatureNode> FeatureVector;
 // symbolic links for short implementation views
-typedef shared_ptr<Model> ModelPtr;
-typedef shared_ptr<Parameter> ParamPtr;
-typedef shared_ptr<Dataset> DatasetPtr;
+typedef std::shared_ptr<Model> ModelPtr;
+
 
 /// Base class for linear models
 ///
@@ -159,7 +160,7 @@ protected:
     bool trained_;
     // parameter instance
     ParamPtr parameter_;
-    void predict_WTx(const FeatureVector, vector<double>&);
+    void predict_WTx(const FeatureVector, std::vector<double>&);
 
 public:
 
@@ -170,13 +171,16 @@ public:
 
     virtual bool is_trained();
     virtual size_t get_n_classes();
-    virtual vector<double> get_labels();
+    virtual std::vector<double> get_labels();
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual double predict(const FeatureVector);
-    virtual double predict_proba(const FeatureVector, vector<double>&);
+    virtual double predict_proba(const FeatureVector, std::vector<double>&);
 
-    void preprocess_data(const DatasetPtr, vector<size_t>&,
-                         vector<size_t>&, vector<size_t>&);
+    void preprocess_data(const DatasetPtr, std::vector<size_t>&,
+                         std::vector<size_t>&, std::vector<size_t>&);
 };
 
+} // oplin
+// using namespace oplin;
+// using namespace oplin::model;
 #endif //LINEAR_H_

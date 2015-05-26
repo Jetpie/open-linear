@@ -1,6 +1,7 @@
 #include "high_level_function.hpp"
-
-
+using namespace oplin;
+using namespace std;
+using namespace Eigen;
 int main(int argc, char** argv)
 {
     std::cout.precision(10);
