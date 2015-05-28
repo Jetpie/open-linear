@@ -10,6 +10,7 @@
 #include <getopt.h>
 #include "linear.hpp"
 #include "logistic.hpp"
+#include "high_level_function.hpp"
 
 using std::cout;
 using std::cerr;
@@ -42,14 +43,14 @@ int main(int argc, char **argv)
     param->solver_type = 0;
     param->problem_type = 0;
     param->bias = -1;
-    param->rela_tol = 0.1;
-    param->abs_tol = 1e-5;
+    param->rela_tol = 1e-5;
+    param->abs_tol = 0.1;
     param->max_epoch = 500;
     param->learning_rate = 0.01;
     // std::vector<double> C(dataset->n_samples,1.);
     // param->C = C;
 
-    static struct option long_options[] = {
+    struct option long_options[] = {
         {"solver",   required_argument, 0,  's' },
         {"problem",  required_argument, 0,  'p' },
         {"bias",     required_argument, 0,  'b' },
@@ -101,16 +102,27 @@ int main(int argc, char **argv)
     cout << param->solver_type << endl;
     cout << param->problem_type << endl;
     cout << "optind : " << optind << endl;
-    if (optind+2 == argc) {
-        printf ("non-option ARGV-elements: ");
-        while (optind < argc)
-            printf ("%s ", argv[optind++]);
-        printf ("\n");
-    }
-    else
+
+    // +2 for train sample file and model file
+    if (optind + 2 != argc)
     {
-            print_help();
-            return EXIT_FAILURE;
+        print_help();
+        return EXIT_FAILURE;
     }
+
+    std::string sample_file(argv[optind++]);
+    std::string model_file(argv[optind++]);
+    cout << "input sample file : " << sample_file << endl;
+    cout << "output model file : " << model_file << endl;
+
+    std::cout.precision(10);
+    DatasetPtr dataset = read_dataset(sample_file,13,param->bias,270);
+    std::vector<double> C(dataset->n_samples,1.);
+    param->C = C;
+    std::shared_ptr<LinearBase> lr= std::make_shared<LogisticRegression>();
+    lr->train(dataset, param);
+    predict_all(sample_file,model_file,lr,true);
+
+
     return EXIT_SUCCESS;
 }
