@@ -23,12 +23,19 @@ void
 LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
 {
     // input sanity check
+    // TODO : validation function on dataset
     if(!param)
-        cerr << "LogisticRegression::train : Error input, param NULL or not valid"
+    {
+        cerr << "LogisticRegression::train : Error input, param NULL or not valid, "
              << __FILE__ << "," << __LINE__ << endl;
+        throw(std::invalid_argument("param not valid"));
+    }
     if(!dataset)
-        cerr << "LogisticRegression::train : Error input, dataset NULL or not valid"
+    {
+        cerr << "LogisticRegression::train : Error input, dataset NULL or not valid, "
              << __FILE__ << "," << __LINE__ << endl;
+        throw(std::invalid_argument("dataset not valid"));
+    }
 
     size_t n_samples = dataset->n_samples;
     size_t dimension = dataset->dimension;
@@ -37,9 +44,13 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // initialize model
     ModelPtr model = std::make_shared<Model>();
     // sanity check
-    assert(model);
+    if(!model)
+    {
+        cerr << "LogisticRegression::train : Model initialization error (memory), "
+             << __FILE__ << "," << __LINE__ << endl;
+        throw(std::bad_alloc());
+    }
 
-    model->bias = param->bias;
     model->dimension = dimension;
     model->n_classes = n_classes;
 
@@ -58,7 +69,14 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     model->labels = dataset->labels;
 
     // preprocess the training dataset
-    preprocess_data(dataset, count, start_idx, perm_idx);
+    try
+    {
+        preprocess_data(dataset, count, start_idx, perm_idx);
+    }
+    catch(std::out_of_range& e)
+    {
+        throw(std::logic_error("preprocessing(grouping) dataset fail!"));
+    }
 
     // permute the instances
     // -construct the Eigen permutation matrix
@@ -102,6 +120,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
             }
             default:
                 cerr << "LogisticRegression::train : invalid problem type, "
+                     << "Default option (L2R_LR) will be used, "
                      << __FILE__ << "," << __LINE__ << endl;
                 break;
         }
@@ -115,12 +134,20 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
             }
             default:
                 cerr << "LogisticRegression::train : invalid solver type, "
+                     << "Default option (L_BFGS) will be used, "
                      << __FILE__ << "," << __LINE__ << endl;
                 break;
         }
         solver->solve(problem, param, w);
-
+        cout << w <<endl;
         double* W_ = new double[w.rows()*w.cols()];
+        // sanity check
+        if(!W_)
+        {
+            cerr << "LogisticRegression::train : W_ initialization error (memory), "
+                 << __FILE__ << "," << __LINE__ << endl;
+            throw(std::bad_alloc());
+        }
         for(int i = 0; i < w.rows();++i)
         {
             for(int j = 0; j < w.cols(); ++j)
@@ -128,11 +155,28 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
                 W_[i * w.cols() + j] = w(i,j);
             }
         }
-
         // load parameter pointer into model, this is good practice if
         // this is production environment, in which read and write
         // manipulations are quite sensitive.
         model->W_ = W_;
+        model->bias = dataset->bias;
+        if(model->bias > 0)
+        {
+            double* bias_values = new double[w.cols()];
+            if(!bias_values)
+            {
+                cerr << "LogisticRegression::train : bias initialization error (memory), "
+                     << __FILE__ << "," << __LINE__ << endl;
+                throw(std::bad_alloc());
+            }
+            // store w_0 * bias term
+            for(int i = 0; i < w.cols();++i)
+            {
+                bias_values[i] = dataset->bias * w(w.rows()-1,i);
+            }
+            model->bias_values = bias_values;
+        }
+
     }
     else
     {

@@ -5,8 +5,8 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#ifndef HIGH_LEVEL_FUNCTION_H_
-#define HIGH_LEVEL_FUNCTION_H_
+#ifndef OPENLINEAR_HIGH_LEVEL_FUNCTION_H_
+#define OPENLINEAR_HIGH_LEVEL_FUNCTION_H_
 
 #include "linear.hpp"
 
@@ -36,10 +36,22 @@ using std::string;
  * @return shared_ptr to loaded dataset
  */
 DatasetPtr
-read_dataset(const string filename, const size_t dimension , const size_t n_entries = 1000)
+read_dataset(const string filename, const size_t n_features ,
+             const double bias = -1, const size_t n_entries = 1000)
 {
     //
     size_t n_samples = 0;
+    // dimension is the length of parameters w, add w_0 if bias is applied
+    size_t dimension;
+    if(bias > 0)
+    {
+        dimension = n_features + 1;
+    }
+    else
+    {
+        dimension = n_features;
+    }
+
     std::vector<double> y;
     y.reserve(n_entries);
 
@@ -69,6 +81,9 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
             // j = n_samples;
             triplets.push_back(Tri(i-1,n_samples,v_ij));
         }
+        // concantenate bias to feature space if bias term is applied
+        if(bias > 0)
+            triplets.push_back(Tri(dimension-1, n_samples, bias));
         ++n_samples;
     }
     infile.close();
@@ -78,6 +93,14 @@ read_dataset(const string filename, const size_t dimension , const size_t n_entr
     {
         cerr << "read_dataset : DatasetPtr allocation failed!"
              << __FILE__ << "," << __LINE__ << endl;
+    }
+    if(bias > 0)
+    {
+        dataset->bias = bias;
+    }
+    else
+    {
+        dataset->bias = -1;
     }
     dataset->n_samples = n_samples;
     dataset->n_classes = classes.size();
@@ -319,4 +342,4 @@ void predict_all(string& input, string& output, std::shared_ptr<LinearBase> lb,
 }
 
 } // oplin
-#endif //HIGH_LEVEL_FUNCTION_H_
+#endif // OPENLINEAR_HIGH_LEVEL_FUNCTION_H_

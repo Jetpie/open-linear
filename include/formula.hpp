@@ -14,8 +14,8 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#ifndef FORMULA_H_
-#define FORMULA_H_
+#ifndef OPENLINEAR_FORMULA_H_
+#define OPENLINEAR_FORMULA_H_
 
 #include "linear.hpp"
 
@@ -53,7 +53,6 @@ public:
 
     double loss(const ColVector&,const std::vector<double>&);
     ColVector gradient(const ColVector&,const std::vector<double>&);
-    ColMatrix hessian(const ColVector&, const std::vector<double>&);
 };
 
 /// L1-Regularized Loss Logistic Regression
@@ -72,9 +71,8 @@ public:
 
     double loss(const ColVector&,const std::vector<double>&);
     ColVector gradient(const ColVector&,const std::vector<double>&);
-    ColMatrix hessian(const ColVector&, const std::vector<double>&);
 };
 
 } // oplin
 
-#endif// FORMULA_H_
+#endif// OPENLINEAR_FORMULA_H_

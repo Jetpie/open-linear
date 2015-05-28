@@ -78,9 +78,7 @@ L1R_LR_Problem::gradient(const ColVector& w, const std::vector<double>& C)
 
     }
 
-    ColVector grad = (*(dataset_->X))*g_ + ColVector::Ones(dataset_->dimension,1);
-
-    return grad;
+    return ( (*(dataset_->X))*g_ + ColVector::Ones(dataset_->dimension,1) );
 }
 
 
@@ -142,9 +140,8 @@ L2R_LR_Problem::gradient(const ColVector& w, const std::vector<double>& C)
 
     }
 
-    ColVector grad = (*(dataset_->X)) * g_ + w;
+    return ( (*(dataset_->X)) * g_ + w );
 
-    return grad;
 }
 
 } // oplin

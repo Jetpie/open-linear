@@ -8,7 +8,7 @@ int main(int argc, char** argv)
     string filename = "res/sample";
     size_t dimension = 13;
 
-    DatasetPtr dataset = read_dataset(filename,dimension,270);
+    DatasetPtr dataset = read_dataset(filename,dimension,-1,270);
 
 
     // cout << *(dataset->X) << endl;

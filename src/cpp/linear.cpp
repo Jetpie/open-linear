@@ -114,6 +114,7 @@ LinearBase::preprocess_data(const DatasetPtr dataset, std::vector<size_t>& count
         {
             cerr << "LinearBase::preprocess_data : Dataset label error!"
                  << __FILE__ << "," << __LINE__ << endl;
+            throw(std::out_of_range("label out of range"));
         }
         index.push_back(j);
     }
@@ -138,7 +139,7 @@ LinearBase::preprocess_data(const DatasetPtr dataset, std::vector<size_t>& count
  * Compute the intermedient result of linear combination with input x
  * and model weights WTx
  *
- * @param x   sparse storageof feature node of <k,v> pair
+ * @param x   sparse storage of feature node of <k,v> pair
  * @param WTx matrix meaning W transpose by x
  *
  * @return label of current prediction
@@ -166,6 +167,14 @@ LinearBase::predict_WTx(FeatureVector x, std::vector<double>& WTx)
             ++cur_w;
         }
 
+    }
+    // if bias term are applied
+    if(model_->bias_values)
+    {
+        for(i=0; i<n_ws; ++i)
+        {
+            WTx[i] += model_->bias_values[i];
+        }
     }
     return;
 

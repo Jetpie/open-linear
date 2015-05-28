@@ -5,12 +5,18 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#ifndef SOLVER_H_
-#define SOLVER_H_
+#ifndef OPENLINEAR_SOLVER_H_
+#define OPENLINEAR_SOLVER_H_
 #include "linear.hpp"
 #include "formula.hpp"
 namespace oplin{
 
+enum LineSearchCondition
+{
+    CONSTANT,
+    ARMIJO_CONDITION,
+    WHOLF_CONDITION
+};
 /// Base class for solvers
 ///
 ///
@@ -19,6 +25,8 @@ class SolverBase
 public:
     virtual ~SolverBase();
     virtual void solve(ProblemPtr, ParamPtr, ColVector&) = 0;
+    virtual void line_search(const ProblemPtr, const ParamPtr,
+                             const ColVector& p, double& alpha);
 };
 
 /// Gradint descent optimizer
@@ -46,14 +54,6 @@ public:
     void solve(ProblemPtr, ParamPtr, ColVector&);
 };
 
-/// Newton conjugate gradient optimizer
-class NewtonCG: public SolverBase
-{
-public:
-    ~NewtonCG();
-    void solve(ProblemPtr, ParamPtr, ColVector&);
-};
-
 /// Newton trust region optimizer
 ///
 /// Reference:
@@ -70,4 +70,4 @@ public:
 
 } // oplin
 // using namespace oplin::solver;
-#endif// SOLVER_H_
+#endif// OPENLINEAR_SOLVER_H_

@@ -1,8 +1,10 @@
 // Linear Models
 //
-// Naming Convention:
-// all mathematical matrix variables are denoted by captial letters
-// like 'X' or 'W'
+// Special Naming Convention:
+//
+// All mathematical matrix variables are named by captial letters
+// (e.g. X means input feature dataset). Vectors are named by lowercase
+// (e.g. w means weights vector). These variables are always from Eigen.
 //
 // The key feature of this linear model is it was implemented by
 // advanced and efficient c++ matrix library Eigen, but only for the
@@ -15,8 +17,8 @@
 //
 // @license: See LICENSE at root directory
 
-#ifndef LINEAR_H_
-#define LINEAR_H_
+#ifndef OPENLINEAR_LINEAR_H_
+#define OPENLINEAR_LINEAR_H_
 
 #include <assert.h>
 #include <iostream>
@@ -24,6 +26,8 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <exception>
+#include <stdexcept>
 #include <Eigen/SparseCore>
 #include <Eigen/Core>
 
@@ -43,6 +47,9 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> C
 typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
 
+// function for absolute manipulation
+template<class T> T ABS(T x){ return (x<0?-x:x);}
+
 /// Dataset parameters
 struct Dataset
 {
@@ -61,6 +68,8 @@ struct Dataset
      * dimension is dimension * n_samples
      */
     SpColMatrixPtr X;
+    double bias;
+    Dataset() : bias(-1.){}
 
 };
 enum FormulaType
@@ -72,7 +81,6 @@ enum SolverType
 {
     GD,
     SGD,
-    NewtonCG,
     L_BFGS,
     TRON
 };
@@ -92,12 +100,13 @@ struct Parameter
     /** absolute loss tolerance for iterative method */
     double abs_tol;
     /** learning rate for iterative method */
-    double lambda;
+    double learning_rate;
     /** maximum iteration for iterative method */
     size_t max_epoch;
     /** C */
     std::vector<double> C;
     double bias;
+    Parameter() : solver_type(0.), problem_type(0.){}
 };
 typedef std::shared_ptr<Parameter> ParamPtr;
 typedef std::shared_ptr<Dataset> DatasetPtr;
@@ -133,12 +142,15 @@ struct Model
     double* W_;
     /** define a bias, 0 if no bias setting */
     double bias;
+    double* bias_values;
     /** labels of classes */
     std::vector<double> labels;
+    Model() : W_(NULL),bias_values(NULL){}
     // destructor must be called for double*
     ~Model()
     {
         delete [] W_;
+        delete [] bias_values;
     };
 
 };
@@ -183,4 +195,4 @@ public:
 } // oplin
 // using namespace oplin;
 // using namespace oplin::model;
-#endif //LINEAR_H_
+#endif //OPENLINEAR_LINEAR_H_
