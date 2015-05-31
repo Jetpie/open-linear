@@ -42,7 +42,8 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     size_t n_classes = dataset->n_classes;
 
     // initialize model
-    ModelPtr model = std::make_shared<Model>();
+    // ModelUniPtr model = std::make_shared<Model>();
+    ModelUniPtr model(new Model());
     // sanity check
     if(!model)
     {
@@ -122,6 +123,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
                 cerr << "LogisticRegression::train : invalid problem type, "
                      << "Default option (L2R_LR) will be used, "
                      << __FILE__ << "," << __LINE__ << endl;
+                problem = std::make_shared<L2R_LR_Problem>(dataset);
                 break;
         }
         // decide solver
@@ -136,6 +138,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
                 cerr << "LogisticRegression::train : invalid solver type, "
                      << "Default option (L_BFGS) will be used, "
                      << __FILE__ << "," << __LINE__ << endl;
+                // TODO : add default initialization on solver
                 break;
         }
         solver->solve(problem, param, w);
@@ -158,7 +161,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         // load parameter pointer into model, this is good practice if
         // this is production environment, in which read and write
         // manipulations are quite sensitive.
-        model->W_ = W_;
+        model->set_weights(W_);
         model->bias = dataset->bias;
         if(model->bias > 0)
         {
@@ -174,7 +177,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
             {
                 bias_values[i] = dataset->bias * w(w.rows()-1,i);
             }
-            model->bias_values = bias_values;
+            model->set_bias_values(bias_values);
         }
 
     }
@@ -182,11 +185,8 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     {
         cout << ">2classes" << endl;
     }
-
-    // flip the training flag
-    this->trained_ = 1;
     // Finally, pass model variable to member model
-    this->model_ = model;
+    this->load_model( std::move(model) );
 
 
     /*

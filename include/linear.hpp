@@ -105,7 +105,7 @@ struct Parameter
     size_t max_epoch;
     /** C */
     std::vector<double> C;
-    double bias;
+
     Parameter() : solver_type(0.), problem_type(0.){}
 };
 typedef std::shared_ptr<Parameter> ParamPtr;
@@ -138,26 +138,45 @@ struct Model
     size_t n_classes;
     /** dimension of feature */
     size_t dimension;
-    /** weights */
-    double* W_;
     /** define a bias, 0 if no bias setting */
     double bias;
-    double* bias_values;
     /** labels of classes */
     std::vector<double> labels;
-    Model() : W_(NULL),bias_values(NULL){}
+    Model() : W_(NULL),bias_values_(NULL){}
     // destructor must be called for double*
     ~Model()
     {
         delete [] W_;
-        delete [] bias_values;
-    };
+        delete [] bias_values_;
+    }
+    void set_bias_values(double* vals)
+    {
+        if(bias_values_)
+            delete [] bias_values_;
+        bias_values_ = vals;
+    }
+    void set_weights(double* w)
+    {
+        if(W_)
+            delete [] W_;
+        W_ = w;
+    }
+// I encapsulate the two pointers to avoid wrong reference in productive env.
+private:
+    double* W_;
+    double* bias_values_;
+    /** weights */
 
+    friend class LinearBase;
 };
 
 typedef std::vector<FeatureNode> FeatureVector;
 // symbolic links for short implementation views
-typedef std::shared_ptr<Model> ModelPtr;
+// typedef std::shared_ptr<Model> ModelPtr;
+
+// the current design keep model to only one owner to avoid wrong reference in
+// productive env.
+typedef std::unique_ptr<Model> ModelUniPtr;
 
 
 /// Base class for linear models
@@ -168,7 +187,7 @@ class LinearBase
 {
 protected:
     // model instance
-    ModelPtr model_;
+    ModelUniPtr model_;
     bool trained_;
     // parameter instance
     ParamPtr parameter_;
@@ -177,13 +196,15 @@ protected:
 public:
 
     LinearBase(void);
-    explicit LinearBase(const ModelPtr);
-    void load_model(const ModelPtr);
+    explicit LinearBase(ModelUniPtr);
     virtual ~LinearBase(void){};
 
     virtual bool is_trained();
     virtual size_t get_n_classes();
     virtual std::vector<double> get_labels();
+    virtual void load_model(ModelUniPtr);
+    virtual ModelUniPtr export_model();
+
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual double predict(const FeatureVector);
     virtual double predict_proba(const FeatureVector, std::vector<double>&);

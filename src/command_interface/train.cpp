@@ -33,6 +33,9 @@ void print_help()
     << "-r [--rela_tol]: relative tolerance between two epochs (default 1e-5)" << endl
     << "-a [--abs_tol]: absolute tolerance of loss (default 0.1)" << endl
     << "-m [--max_epoch]: max epoch setting (default 500)" << endl
+    << "-d [--dimension]: maximum dimension of feature exclude bias term (no default, must be specified)" << endl
+    << "-e [--estimate_n_samples]: estimation on number of training samples."
+        " accurate estimation can improve the memory usage (default 1000)" << endl
     << "-l [--learning_rate]: learning rate setting (default 0.01)"
     <<endl;
 }
@@ -42,7 +45,6 @@ int main(int argc, char **argv)
     ParamPtr param = std::make_shared<Parameter>();
     param->solver_type = 0;
     param->problem_type = 0;
-    param->bias = -1;
     param->rela_tol = 1e-5;
     param->abs_tol = 0.1;
     param->max_epoch = 500;
@@ -50,6 +52,8 @@ int main(int argc, char **argv)
     // std::vector<double> C(dataset->n_samples,1.);
     // param->C = C;
 
+    int bias = -1;
+    size_t n_features = 0, estimate_n_samples = 1000;
     struct option long_options[] = {
         {"solver",   required_argument, 0,  's' },
         {"problem",  required_argument, 0,  'p' },
@@ -58,12 +62,14 @@ int main(int argc, char **argv)
         {"abs_tol",  required_argument, 0,  'a' },
         {"max_epoch",required_argument, 0,  'm' },
         {"learning_rate",required_argument, 0,  'l' },
+        {"dimension",required_argument, 0,  'd' },
+        {"estimate_samples",required_argument, 0,  'e' },
         {"help",     no_argument,       0,  'h' },
         {0,0,0,0}
     };
 
     int opt,option_index = 0;
-    while ((opt = getopt_long(argc, argv, "s:p:hb:r:a:m:l:",
+    while ((opt = getopt_long(argc, argv, "s:p:hb:r:a:m:l:d:e:",
                               long_options, &option_index)) != -1) {
         switch (opt) {
         case 's':
@@ -73,7 +79,7 @@ int main(int argc, char **argv)
             param->problem_type = atoi(optarg);
             break;
         case 'b':
-            param->bias = atof(optarg);
+            bias = atof(optarg);
             break;
         case 'r':
             param->rela_tol = atof(optarg);
@@ -87,6 +93,12 @@ int main(int argc, char **argv)
         case 'l':
             param->learning_rate = atof(optarg);
             break;
+        case 'd':
+            n_features = atoi(optarg);
+            break;
+        case 'e':
+            estimate_n_samples = atoi(optarg);
+            break;
         case 'h':
             print_help();
             return EXIT_SUCCESS;
@@ -99,28 +111,31 @@ int main(int argc, char **argv)
         }
     }
 
-    cout << param->solver_type << endl;
-    cout << param->problem_type << endl;
-    cout << "optind : " << optind << endl;
-
     // +2 for train sample file and model file
-    if (optind + 2 != argc)
+    if (optind + 2 != argc || !n_features )
     {
         print_help();
         return EXIT_FAILURE;
     }
 
+    //
     std::string sample_file(argv[optind++]);
     std::string model_file(argv[optind++]);
     cout << "input sample file : " << sample_file << endl;
     cout << "output model file : " << model_file << endl;
 
+    // set std::cout precision
     std::cout.precision(10);
-    DatasetPtr dataset = read_dataset(sample_file,13,param->bias,270);
+    // read dataset
+    DatasetPtr dataset = read_dataset(sample_file, n_features , bias, estimate_n_samples);
+    // set temp soft margin for temporal
     std::vector<double> C(dataset->n_samples,1.);
     param->C = C;
+    // logistic regresion instance
     std::shared_ptr<LinearBase> lr= std::make_shared<LogisticRegression>();
+    // train model
     lr->train(dataset, param);
+    // predict file
     predict_all(sample_file,model_file,lr,true);
 
 

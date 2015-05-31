@@ -1,6 +1,6 @@
 # ENV
-CC = g++
-# CC = clang --analyze # and comment out the linker last line for sanity
+CXX = g++
+
 EIGENROOT ?= $(HOME)/user-libs/eigen-3.2.4
 
 BIN_DIR := ./bin
@@ -10,7 +10,7 @@ INC_DIR := ./include
 OBJ_DIR := ./obj
 
 # FLAGS
-CFLAGS := -g -Wall  -std=c++0x -O3 -Wno-deprecated-declarations -I$(EIGENROOT) -I$(INC_DIR)/
+CXXFLAGS := -g -Wall  -std=c++0x -O3 -Wno-deprecated-declarations -I$(EIGENROOT) -I$(INC_DIR)/
 LDFLAGS :=
 
 # custom functions
@@ -41,17 +41,17 @@ all: $(BIN_TGT)
 
 $(BIN_DIR)/%: $(SRC_DIR)/tests/%.cpp $(OBJECTS) $(dirs)
 	@echo "	Linking..."
-	@echo "	$(CC) $(CFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@";  \
-	$(CC) $(CFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@
+	@echo "	$(CXX) $(CXXFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@";  \
+	$(CXX) $(CXXFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@
 
 $(BIN_DIR)/%: $(SRC_DIR)/command_interface/%.cpp $(OBJECTS) $(dirs)
 	@echo "	Linking..."
-	@echo "	$(CC) $(CFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@";  \
-	$(CC) $(CFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@
+	@echo "	$(CXX) $(CXXFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@";  \
+	$(CXX) $(CXXFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/cpp/%.cpp $(dirs)
 	@mkdir -p $(OBJ_DIR)
-	@echo "	$(CC) $(CFLAGS) -c -o $@ $<"; $(CC) $(CFLAGS) -c -o $@ $<
+	@echo "	$(CXX) $(CXXFLAGS) -c -o $@ $<"; $(CXX) $(CXXFLAGS) -c -o $@ $<
 
 
 clean:

@@ -91,8 +91,9 @@ read_dataset(const string filename, const size_t n_features ,
     DatasetPtr dataset = std::make_shared<Dataset>();
     if(!dataset)
     {
-        cerr << "read_dataset : DatasetPtr allocation failed!"
+        cerr << "read_dataset : DatasetPtr allocation failed!, "
              << __FILE__ << "," << __LINE__ << endl;
+        throw(std::bad_alloc());
     }
     if(bias > 0)
     {
@@ -112,6 +113,7 @@ read_dataset(const string filename, const size_t n_features ,
     {
         cerr << "read_dataset : SpColMatrixPtr allocation failed!"
              << __FILE__ << "," << __LINE__ << endl;
+        throw(std::bad_alloc());
     }
 
     // assign values
@@ -120,21 +122,35 @@ read_dataset(const string filename, const size_t n_features ,
     return dataset;
 }
 
-/*
- * Load model from file. Fixed terms for each line
+// /**
+//  * Save model to file
+//  *
+//  * @param model shared_ptr for model
+//  * @param filename
+//  *
+//  */
+// void save_model(const ModelUniPtr model, const string& filename)
+// {
+
+// }
+
+/**
+ * Load model from file.
  *
  * @param filename inpute filename for model
  *
  * @return shared_ptr for Model
  */
-ModelPtr load_model(const string& filename)
+ModelUniPtr load_model(const string& filename)
 {
-    ModelPtr model = std::make_shared<Model>();
+//    ModelUniPtr model = std::make_shared<Model>();
+    ModelUniPtr model = std::unique_ptr<Model>(new Model);
     // sanity check
     if(!model)
     {
-        cerr << "read_dataset : ModelPtr allocation failed!"
+        cerr << "read_dataset : ModelUniPtr allocation failed!"
              << __FILE__ << "," << __LINE__ << endl;
+        throw(std::bad_alloc());
     }
 
     std::ifstream infile(filename);
@@ -182,8 +198,9 @@ ModelPtr load_model(const string& filename)
             // sanity check
             if(!W_)
             {
-                cerr << "read_dataset : ModelPtr allocation failed!"
+                cerr << "read_dataset : ModelUniPtr allocation failed!"
                      << __FILE__ << "," << __LINE__ << endl;
+                throw(std::bad_alloc());
             }
             for(size_t i =0;i < model->dimension; ++i)
             {
@@ -196,7 +213,7 @@ ModelPtr load_model(const string& filename)
                     W_[i*cols + j] = std::stod(item);
                 }
             }
-            model->W_ = W_;
+            model->set_weights(W_);
 
             if(std::getline(infile,line))
             {
@@ -214,6 +231,7 @@ ModelPtr load_model(const string& filename)
     return model;
 
 }
+
 
 /**
  * Make prediction on all label and feature pairs of the input file.

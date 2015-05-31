@@ -15,7 +15,6 @@ int main(int argc, char** argv)
     ParamPtr param = make_shared<Parameter>();
     param->solver_type = 0;
     param->problem_type = 0;
-    param->bias = 0.001;
     param->rela_tol = 0.0001;
     param->abs_tol = 0.00001;
     param->max_epoch = 500;

@@ -37,13 +37,13 @@ int main(int argc, char** argv)
     cout << endl;
 
     const string model_name = "res/sample.model";
-    ModelPtr model = load_model(model_name);
-    cout << "model" <<endl;
-    double* W_ = model->W_;
-    for(size_t i = 0; i < (model->n_classes-1) * model->dimension;++i)
-    {
-        cout << W_[i] << endl;
-    }
+    ModelUniPtr model = load_model(model_name);
+    // cout << "model" <<endl;
+    // double* W_ = model->W_;
+    // for(size_t i = 0; i < (model->n_classes-1) * model->dimension;++i)
+    // {
+    //     cout << W_[i] << endl;
+    // }
 
 
 }

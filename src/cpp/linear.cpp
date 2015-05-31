@@ -17,10 +17,10 @@ using std::cerr;
 using std::endl;
 using namespace Eigen;
 
-LinearBase::LinearBase() : model_(NULL),trained_(false) {};
-LinearBase::LinearBase(const ModelPtr model)
+LinearBase::LinearBase() : model_(nullptr),trained_(false) {};
+LinearBase::LinearBase(ModelUniPtr model)
 {
-    load_model(model);
+    load_model( std::move(model) );
 }
 
 /**
@@ -29,11 +29,22 @@ LinearBase::LinearBase(const ModelPtr model)
  * @param model shared_ptr to Model instance
  */
 void
-LinearBase::load_model(const ModelPtr model)
+LinearBase::load_model(ModelUniPtr model)
 {
     // TODO: add check of model
-    this->model_ = model;
+    this->model_.reset(model.release());
     this->trained_ = true;
+}
+/**
+ * Getter for model
+ *
+ * @return unique_ptr for Model
+ */
+ModelUniPtr
+LinearBase::export_model()
+{
+    this->trained_ = false;
+    return std::move(model_);
 }
 /**
  * Return a state if the model parameter is trained
@@ -169,11 +180,11 @@ LinearBase::predict_WTx(FeatureVector x, std::vector<double>& WTx)
 
     }
     // if bias term are applied
-    if(model_->bias_values)
+    if(model_->bias_values_)
     {
         for(i=0; i<n_ws; ++i)
         {
-            WTx[i] += model_->bias_values[i];
+            WTx[i] += model_->bias_values_[i];
         }
     }
     return;
