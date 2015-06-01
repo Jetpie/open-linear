@@ -1,8 +1,15 @@
 // Linear Models
 //
-// Naming Convention:
-// all mathematical matrix variables are denoted by captial letters
-// like 'X' or 'W'
+// Special Naming Convention:
+//
+// All mathematical matrix variables are named by captial letters
+// (e.g. X means input feature dataset). Vectors are named by lowercase
+// (e.g. w means weights vector). These variables are always from Eigen.
+//
+// The key feature of this linear model is it was implemented by
+// advanced and efficient c++ matrix library Eigen, but only for the
+// training stage. After that, the weights are stored in normal c++
+// array for fast predicting and robust interface.
 //
 // @author: Bingqing Qu
 //
@@ -10,6 +17,7 @@
 //
 // @license: See LICENSE at root directory
 #include "linear.hpp"
+#include <fstream>
 
 namespace oplin{
 using std::cout;
@@ -36,7 +44,9 @@ LinearBase::load_model(ModelUniPtr model)
     this->trained_ = true;
 }
 /**
- * Getter for model
+ * Export model (unique_ptr) to outside. As long as the control was taken
+ * by outside, the inner model should be retrained or re-taken for the
+ * safty consideration.
  *
  * @return unique_ptr for Model
  */
@@ -45,6 +55,41 @@ LinearBase::export_model()
 {
     this->trained_ = false;
     return std::move(model_);
+}
+void
+LinearBase::export_model_to_file(const std::string& filename)
+{
+    std::ofstream outfile(filename,std::ios::out);
+    outfile.precision(10);
+    // this sort of error should never happen?
+    if(!outfile.is_open())
+    {
+        cerr << "LinearBase::export_model_to_file : Could not open output file!"
+             << __FILE__ << "," << __LINE__ << endl;
+        throw std::runtime_error("Could not open outpuf file!");
+    }
+    outfile << "n_classes " << model_->n_classes <<"\n";
+    outfile << "labels ";
+    for(std::vector<double>::iterator it(model_->labels.begin());it!=model_->labels.end();++it)
+        outfile << *it <<" ";
+    outfile << "\n";
+    outfile << "dimension " << model_->dimension <<"\n";
+    outfile << "bias " << model_->bias <<"\n";
+    // output weights
+    // for binary classification only one weights trained
+    size_t n_ws = model_->n_classes == 2 ? 1 : model_->n_classes;
+    outfile << "weights\n";
+    double* cur_w = model_->W_;
+    size_t i,j;
+    for(i = 0; i < model_->dimension ; ++i)
+    {
+        for(j=0; j<n_ws; ++j)
+        {
+            outfile << *cur_w <<" ";
+            ++cur_w;
+        }
+        outfile << "\n";
+    }
 }
 /**
  * Return a state if the model parameter is trained

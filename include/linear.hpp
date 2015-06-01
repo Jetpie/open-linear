@@ -204,7 +204,7 @@ public:
     virtual std::vector<double> get_labels();
     virtual void load_model(ModelUniPtr);
     virtual ModelUniPtr export_model();
-
+    virtual void export_model_to_file(const std::string&);
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual double predict(const FeatureVector);
     virtual double predict_proba(const FeatureVector, std::vector<double>&);

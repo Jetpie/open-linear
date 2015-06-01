@@ -122,17 +122,17 @@ read_dataset(const string filename, const size_t n_features ,
     return dataset;
 }
 
-// /**
-//  * Save model to file
-//  *
-//  * @param model shared_ptr for model
-//  * @param filename
-//  *
-//  */
-// void save_model(const ModelUniPtr model, const string& filename)
-// {
-
-// }
+/**
+ * Save model to file
+ *
+ * @param model shared_ptr for model
+ * @param filename
+ *
+ */
+void save_model(std::shared_ptr<LinearBase> lb, const string& filename)
+{
+    lb->export_model_to_file(filename);
+}
 
 /**
  * Load model from file.
@@ -162,22 +162,18 @@ ModelUniPtr load_model(const string& filename)
         // get content indicator
         std::getline(ss,item,' ');
 
-        if(item == "solver_type")
-        {
-            cout << "solver_type meet, jump over" << endl;
-        }
-        else if(item == "nr_class")
+        if(item == "n_classes")
         {
             std::getline(ss,item,' ');
             model->n_classes = std::stod(item);
         }
-        else if(item == "label")
+        else if(item == "labels")
         {
             model->labels.reserve(model->n_classes);
             while( std::getline(ss,item,' ') )
                 model->labels.push_back(std::stod(item));
         }
-        else if(item == "nr_feature")
+        else if(item == "dimension")
         {
             std::getline(ss,item,' ');
             model->dimension = std::stod(item);
@@ -187,7 +183,7 @@ ModelUniPtr load_model(const string& filename)
             std::getline(ss,item,' ');
             model->bias = std::stod(item);
         }
-        else if(item == "w")
+        else if(item == "weights")
         {
             size_t cols;
             if(model->n_classes == 2)
@@ -245,7 +241,7 @@ ModelUniPtr load_model(const string& filename)
  * @param estimate_n       estimation of number of input feature.
  *                         this will automatically be recomputed if exceeds.
  */
-void predict_all(string& input, string& output, std::shared_ptr<LinearBase> lb,
+void predict_all(const string& input, const string& output, std::shared_ptr<LinearBase> lb,
                  bool flag_probability = false, size_t estimate_n = 100)
 {
     if(!lb->is_trained())
@@ -257,9 +253,9 @@ void predict_all(string& input, string& output, std::shared_ptr<LinearBase> lb,
     std::ofstream outfile(output,std::ios::out);
     if(!outfile.is_open())
     {
-        cerr << "predict_all : output file open error!"
+        cerr << "predict_all : Could not open output file!"
              << __FILE__ << "," << __LINE__ << endl;
-
+        throw std::runtime_error("Could not open outpuf file!");
     }
 
     size_t n_classes = lb->get_n_classes();

@@ -19,7 +19,7 @@ using namespace oplin;
 
 void print_help()
 {
-    cerr
+    cout
     << "Usage: train [train options] dataset_file model_file " << endl
     << "train options:" << endl
     << "-s [--solver]: solver type (default 0)" <<endl
@@ -36,7 +36,8 @@ void print_help()
     << "-d [--dimension]: maximum dimension of feature exclude bias term (no default, must be specified)" << endl
     << "-e [--estimate_n_samples]: estimation on number of training samples."
         " accurate estimation can improve the memory usage (default 1000)" << endl
-    << "-l [--learning_rate]: learning rate setting (default 0.01)"
+    << "-l [--learning_rate]: learning rate setting (default 0.01)" << endl
+    << "-h [--help]: print usage help information"
     <<endl;
 }
 
@@ -135,8 +136,11 @@ int main(int argc, char **argv)
     std::shared_ptr<LinearBase> lr= std::make_shared<LogisticRegression>();
     // train model
     lr->train(dataset, param);
+    lr->export_model_to_file(model_file);
+    lr->load_model(std::move(load_model(model_file)));
+    lr->export_model_to_file(model_file);
     // predict file
-    predict_all(sample_file,model_file,lr,true);
+    //predict_all(sample_file,model_file,lr,true);
 
 
     return EXIT_SUCCESS;
