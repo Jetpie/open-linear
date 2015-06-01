@@ -1,4 +1,4 @@
-// Command line interface for train settings
+// Command line interface for predict settings
 //
 // @author: Bingqing Qu
 //

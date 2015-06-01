@@ -218,7 +218,7 @@ ModelUniPtr load_model(const string& filename)
         }
         else
         {
-            cerr << "Unexpected words in model file : " << item << endl;
+            cerr << "Unexpected keywords in model file : " << item << endl;
             cerr << "Please check model and read again..."  << endl;
             return NULL;
         }
@@ -248,6 +248,7 @@ void predict_all(const string& input, const string& output, std::shared_ptr<Line
     {
         cerr << "predict_all : Model not trained,  please train the model first!"
              << __FILE__ << "," << __LINE__ << endl;
+        throw std::runtime_error("Model void!");
     }
     std::ifstream infile(input);
     std::ofstream outfile(output,std::ios::out);
@@ -296,8 +297,8 @@ void predict_all(const string& input, const string& output, std::shared_ptr<Line
         // if true label is not known to model
         if(it == label_index.end())
         {
-            cout << "Warning: Unknown label(" << true_label
-                 << ") to model in file, jump over!";
+            cout << "Warning: Unexpected label(" << true_label
+                 << ") to model in file, will jump the line!";
             // jump over
             continue;
         }
