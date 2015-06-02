@@ -5,17 +5,14 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#include <stdio.h>     /* for printf */
-#include <stdlib.h>    /* for exit */
 #include <getopt.h>
-#include "linear.hpp"
 #include "logistic.hpp"
 #include "high_level_function.hpp"
 
 using std::cout;
 using std::cerr;
 using std::endl;
-using namespace oplin;
+
 
 void print_help()
 {
@@ -43,15 +40,14 @@ void print_help()
 
 int main(int argc, char **argv)
 {
-    ParamPtr param = std::make_shared<Parameter>();
+    oplin::ParamPtr param = std::make_shared<oplin::Parameter>();
     param->solver_type = 0;
     param->problem_type = 0;
     param->rela_tol = 1e-5;
     param->abs_tol = 0.1;
     param->max_epoch = 500;
     param->learning_rate = 0.01;
-    // std::vector<double> C(dataset->n_samples,1.);
-    // param->C = C;
+
 
     int bias = -1;
     size_t n_features = 0, estimate_n_samples = 1000;
@@ -128,19 +124,15 @@ int main(int argc, char **argv)
     // set std::cout precision
     std::cout.precision(10);
     // read dataset
-    DatasetPtr dataset = read_dataset(sample_file, n_features , bias, estimate_n_samples);
+    oplin::DatasetPtr dataset = oplin::read_dataset(sample_file, n_features , bias, estimate_n_samples);
     // set temp soft margin for temporal
     std::vector<double> C(dataset->n_samples,1.);
     param->C = C;
     // logistic regresion instance
-    std::shared_ptr<LinearBase> lr= std::make_shared<LogisticRegression>();
+    std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
     // train model
     lr->train(dataset, param);
     lr->export_model_to_file(model_file);
-    lr->load_model(std::move(load_model(model_file)));
-    lr->export_model_to_file(model_file);
-    // predict file
-    //predict_all(sample_file,model_file,lr,true);
 
 
     return EXIT_SUCCESS;

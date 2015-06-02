@@ -5,17 +5,13 @@
 // Copyright (C) 2014-2015  Bingqing Qu <sylar.qu@gmail.com>
 //
 // @license: See LICENSE at root directory
-#include <stdio.h>     /* for printf */
-#include <stdlib.h>    /* for exit */
 #include <getopt.h>
-#include "linear.hpp"
 #include "logistic.hpp"
 #include "high_level_function.hpp"
 
 using std::cout;
 using std::cerr;
 using std::endl;
-using namespace oplin;
 
 void print_help()
 {
@@ -76,9 +72,9 @@ int main(int argc, char **argv)
     cout << "input sample file : " << sample_file << endl;
     cout << "model file : " << model_file << endl;
     cout << "output file : " << output_file << endl;
-    std::shared_ptr<LinearBase> lr= std::make_shared<LogisticRegression>();
-    lr->load_model(std::move(load_model(model_file)));
-    predict_all(sample_file,output_file, lr, probability, estimate_n_samples);
+    std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
+    lr->load_model(std::move(oplin::load_model(model_file)));
+    oplin::predict_all(sample_file,output_file, lr, probability, estimate_n_samples);
 
 
     return EXIT_SUCCESS;
