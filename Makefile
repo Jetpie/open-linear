@@ -27,8 +27,8 @@ define gendir
 $(1)=$(foreach x,$(2),$(x)/.dirstamp)
 endef
 
-SOURCES:= $(wildcard $(SRC_DIR)/cpp/*.cpp)
-OBJECTS:= $(patsubst $(SRC_DIR)/cpp/%,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
+SOURCES:= $(wildcard $(SRC_DIR)/core/*.cpp)
+OBJECTS:= $(patsubst $(SRC_DIR)/core/%,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 BIN_SRC:= $(wildcard $(SRC_DIR)/tests/*.cpp $(SRC_DIR)/command_interface/*.cpp)
 BIN_TGT:= $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(BIN_SRC))))
 
@@ -49,7 +49,7 @@ $(BIN_DIR)/%: $(SRC_DIR)/command_interface/%.cpp $(OBJECTS) $(dirs)
 	@echo "	$(CXX) $(CXXFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@";  \
 	$(CXX) $(CXXFLAGS) $< $(OBJECTS) $(LDFLAGS) -o $@
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/cpp/%.cpp $(dirs)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/core/%.cpp $(dirs)
 	@mkdir -p $(OBJ_DIR)
 	@echo "	$(CXX) $(CXXFLAGS) -c -o $@ $<"; $(CXX) $(CXXFLAGS) -c -o $@ $<
 
