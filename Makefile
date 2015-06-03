@@ -10,7 +10,12 @@ INC_DIR := ./include
 OBJ_DIR := ./obj
 
 # FLAGS
-CXXFLAGS := -g -Wall  -std=c++0x -O3 -Wno-deprecated-declarations -I$(EIGENROOT) -I$(INC_DIR)/
+CXXFLAGS := -g -Wall -std=c++0x -O3 -Wno-deprecated-declarations \
+-I$(EIGENROOT) -I$(INC_DIR)/
+ifeq "$(ENABLE_DEBUG)" "yes"
+CXXFLAGS += -D_OPLIN_DEBUG
+endif
+
 LDFLAGS :=
 
 # custom functions
@@ -31,13 +36,13 @@ SOURCES:= $(wildcard $(SRC_DIR)/core/*.cpp)
 OBJECTS:= $(patsubst $(SRC_DIR)/core/%,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
 BIN_SRC:= $(wildcard $(SRC_DIR)/tests/*.cpp $(SRC_DIR)/command_interface/*.cpp)
 BIN_TGT:= $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(BIN_SRC))))
-
+BIN_CMD = $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(wildcard $(SRC_DIR)/command_interface/*.cpp)) ) )
 # generate the all-dir target
 $(eval $(call gendir, dirs, $(BIN_DIR) $(OBJ_DIR) ))
 
 .PRECIOUS: $(OBJECTS)
 all: $(BIN_TGT)
-
+interface: $(BIN_CMD)
 
 $(BIN_DIR)/%: $(SRC_DIR)/tests/%.cpp $(OBJECTS) $(dirs)
 	@echo "	Linking..."
@@ -58,4 +63,4 @@ clean:
 	@echo "	Cleaning..."
 	@echo "	$(RM) -r $(OBJ_DIR) $(BIN_DIR)/*"; $(RM) -r $(OBJ_DIR) $(BIN_DIR)/*
 
-.PHONY: clean all
+.PHONY: clean all interface

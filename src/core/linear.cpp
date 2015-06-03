@@ -24,7 +24,15 @@ using std::cout;
 using std::cerr;
 using std::endl;
 using namespace Eigen;
-
+void VOUT(const char* fmt, ...)
+{
+#ifdef _OPLIN_DEBUG_
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+#endif
+}
 LinearBase::LinearBase() : model_(nullptr),trained_(false) {};
 LinearBase::LinearBase(ModelUniPtr model)
 {

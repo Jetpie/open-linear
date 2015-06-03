@@ -30,7 +30,8 @@
 #include <stdexcept>
 #include <Eigen/SparseCore>
 #include <Eigen/Core>
-
+#include <stdio.h>
+#include <stdarg.h>
 namespace oplin{
 
 // Define Eigen vector and matrix types we will use
@@ -48,7 +49,12 @@ typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
 
 // function for absolute manipulation
-template<class T> T ABS(T x){ return (x<0?-x:x);}
+#ifndef ABS
+template<class T> inline T ABS(T x){ return (x<0?-x:x);}
+#endif
+
+void VOUT(const char* fmt, ...);
+
 
 /// Dataset parameters
 struct Dataset

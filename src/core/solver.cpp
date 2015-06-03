@@ -6,9 +6,9 @@ using std::cout;
 using std::endl;
 using std::cerr;
 using namespace Eigen;
+
 SolverBase::~SolverBase(){}
 GradientDescent::~GradientDescent(){}
-
 /**
  * Line search
  *
@@ -42,9 +42,9 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, ColVector& w)
         double loss = problem->loss(w, param->C);
         rela_improve = ABS(loss - last_loss);
 
-        cout << "current loss for epoch " << epoch << " : " << loss << endl;
-        cout << "relative improvement for epoch " << epoch << " : "
-             << rela_improve << endl;
+        // cout << "current loss for epoch " << epoch << " : " << loss << endl;
+        VOUT("Epoch(%d) - loss : %f / relative improvement : %f\n" ,
+             epoch,loss,rela_improve);
 
         if(rela_improve < param->rela_tol || loss < param->abs_tol)
             break;

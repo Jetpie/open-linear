@@ -10,8 +10,6 @@
 
 #include "linear.hpp"
 
-#include <stdio.h>
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <set>

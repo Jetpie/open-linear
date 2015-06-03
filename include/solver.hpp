@@ -69,5 +69,5 @@ public:
 };
 
 } // oplin
-// using namespace oplin::solver;
+
 #endif// OPENLINEAR_SOLVER_H_

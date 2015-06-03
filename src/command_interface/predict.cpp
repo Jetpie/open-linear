@@ -69,9 +69,11 @@ int main(int argc, char **argv)
     std::string sample_file(argv[optind++]);
     std::string model_file(argv[optind++]);
     std::string output_file(argv[optind++]);
+
     cout << "input sample file : " << sample_file << endl;
     cout << "model file : " << model_file << endl;
     cout << "output file : " << output_file << endl;
+
     std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
     lr->load_model(std::move(oplin::load_model(model_file)));
     oplin::predict_all(sample_file,output_file, lr, probability, estimate_n_samples);

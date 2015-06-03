@@ -142,7 +142,12 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
                 break;
         }
         solver->solve(problem, param, w);
+
+        cout << "----------Development Print----------" << endl;
+        cout <<"weights:"<<endl;
         cout << w <<endl;
+        cout << "-----------------End-----------------" << endl;
+
         double* W_ = new double[w.rows()*w.cols()];
         // sanity check
         if(!W_)

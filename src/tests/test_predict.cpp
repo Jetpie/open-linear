@@ -11,21 +11,9 @@ int main(int argc, char** argv)
     size_t dimension = 13;
     DatasetPtr dataset = read_dataset(filename,dimension,270);
 
-    const string model_name = "res/sample.model";
+    const string model_name = "res/testmodel";
     ModelUniPtr model = load_model(model_name);
-    // cout << "model" <<endl;
-    // double* W_ = model->W_;
-    // for(size_t i = 0; i < (model->n_classes-1) * model->dimension;++i)
-    // {
-    //     cout << W_[i] << endl;
-    // }
     shared_ptr<LinearBase> lr= make_shared<LogisticRegression>(std::move(model));
-
-    // cout << *(dataset->X) << endl;
-    cout << dataset->n_samples <<endl;
-    cout << dataset->dimension << endl;
-    cout << dataset->n_classes << endl;
-    cout << endl;
 
     //clock_t s;
     for(int k =0; k < (dataset->X)->outerSize(); ++k)
