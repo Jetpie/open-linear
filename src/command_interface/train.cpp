@@ -19,22 +19,22 @@ void print_help()
     cout
     << "Usage: train [train options] dataset_file model_file " << endl
     << "train options:" << endl
-    << "-s [--solver]: solver type (default 0)" <<endl
+    << "-s [--solver]: Solver type (default 0)" <<endl
     << "\t0 -- Steepest(Gradient) Descent" <<endl
     << "\t1 -- Stochastic Gradient Descent" <<endl
     << "\t2 -- L-BFGS" <<endl
-    << "-p [--problem]: problem type (default 0)" <<endl
+    << "-p [--problem]: Problem type (default 0)" <<endl
     << "\t0 -- L1-regularized logistic regression" <<endl
     << "\t1 -- L2-regularized logistic regression" << endl
-    << "-b [--bias]: bias term, -1 for no bias term applied (default -1)" <<endl
-    << "-r [--rela_tol]: relative tolerance between two epochs (default 1e-5)" << endl
-    << "-a [--abs_tol]: absolute tolerance of loss (default 0.1)" << endl
-    << "-m [--max_epoch]: max epoch setting (default 500)" << endl
-    << "-d [--dimension]: maximum dimension of feature exclude bias term (no default, must be specified)" << endl
-    << "-e [--estimate_n_samples]: estimation on number of training samples."
-        " accurate estimation can improve the memory usage (default 1000)" << endl
-    << "-l [--learning_rate]: learning rate setting (default 0.01)" << endl
-    << "-h [--help]: print usage help information"
+    << "-b [--bias]: Bias term, -1 for no bias term applied (default -1)" <<endl
+    << "-r [--rela_tol]: Relative tolerance between two epochs (default 1e-5)" << endl
+    << "-a [--abs_tol]: Absolute tolerance of loss (default 0.1)" << endl
+    << "-m [--max_epoch]: Max epoch setting (default 500)" << endl
+    << "-d [--dimension]: Maximum dimension of feature exclude bias term (no default, must be specified)" << endl
+    << "-e [--estimate_n_samples]: Estimation on number of training samples."
+        " Precious estimation can improve the memory usage (default 1000)" << endl
+    << "-l [--learning_rate]: Learning rate setting (default 0.01)" << endl
+    << "-h [--help]: Print usage help information"
     <<endl;
 }
 

@@ -143,7 +143,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         }
         solver->solve(problem, param, w);
 
-        cout << "----------Development Print----------" << endl;
+        cout << "--------------Dev Print--------------" << endl;
         cout <<"weights:"<<endl;
         cout << w <<endl;
         cout << "-----------------End-----------------" << endl;

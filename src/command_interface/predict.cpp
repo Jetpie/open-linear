@@ -18,10 +18,10 @@ void print_help()
     cout
     << "Usage: predict [predict options] dataset_file model_file outpuf_file" << endl
     << "predict options:" << endl
-    << "-p [--probability]: output the probability or not, 0 or 1 (default 0)" <<endl
-    << "-e [--estimate_n_samples]: estimation on number of training samples."
-        " accurate estimation can improve the memory usage (default 100)" << endl
-    << "-h [--help]: print usage help information"
+    << "-p [--probability]: Output the probability or not, 0 or 1 (default 0)" <<endl
+    << "-e [--estimate_n_samples]: Estimation on number of training samples."
+        " Precise estimation can improve the memory usage (default 100)" << endl
+    << "-h [--help]: Print usage help information"
     <<endl;
 }
 
