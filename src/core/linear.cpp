@@ -222,7 +222,7 @@ LinearBase::predict_WTx(FeatureVector x, std::vector<double>& WTx)
     // weights for current feature dimension
     double* cur_w;
     // compute W^T x
-    for(std::vector<FeatureNode>::iterator it=x.begin(); it!=x.end(); ++it)
+    for(FeatureVector::iterator it=x.begin(); it!=x.end(); ++it)
     {
         cur_w = &w[(it->i) *n_ws];
         for(i=0; i<n_ws; ++i)
@@ -230,7 +230,6 @@ LinearBase::predict_WTx(FeatureVector x, std::vector<double>& WTx)
             WTx[i] += it->v * (*cur_w);
             ++cur_w;
         }
-
     }
     // if bias term are applied
     if(model_->bias_values_)

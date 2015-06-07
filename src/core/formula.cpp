@@ -31,14 +31,14 @@ L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
 L1R_LR_Problem::~L1R_LR_Problem(){}
 
 /**
- * Compute the loss function of logistic regression
+ * Compute the L1-regularized loss functionn
  *
- * @param w
+ * @param w weights
  * @param C
  *
  */
 double
-L1R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
+L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
 {
     // loss value, initilization
     // l1-norm regularization term
@@ -48,7 +48,7 @@ L1R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
     std::vector<double> y = dataset_->y;
 
     // W^T X
-    g_ = w.transpose() * (*(dataset_->X));
+    g_.noalias() = w.transpose() * (*(dataset_->X));
 
     // loss function : negative log likelihood
     for(size_t i = 0; i < n_samples; ++i)
@@ -59,12 +59,13 @@ L1R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
 }
 
 /**
- * Compute the gradient
+ * Compute the L1-regularized gradient descent direction
  *
- *
+ * @param w weights
+ * @param C
  */
 ColVector
-L1R_LR_Problem::gradient(const ColVector& w, const std::vector<double>& C)
+L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
 {
     const size_t n_samples = dataset_->n_samples;
     const std::vector<double> y = dataset_->y;
@@ -93,14 +94,14 @@ L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
 L2R_LR_Problem::~L2R_LR_Problem(){}
 
 /**
- * Compute the loss function of logistic regression
+ * Compute the L2-regularized loss functionn
  *
  * @param w
  * @param C
  *
  */
 double
-L2R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
+L2R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
 {
     // loss value, initilization
     // l2-norm regularization term
@@ -110,7 +111,7 @@ L2R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
     std::vector<double> y = dataset_->y;
 
     // W^T X
-    g_ = w.transpose() * (*(dataset_->X));
+    g_.noalias() = w.transpose() * (*(dataset_->X));
 
     // loss function : negative log likelihood
     for(size_t i = 0; i < n_samples; ++i)
@@ -121,12 +122,12 @@ L2R_LR_Problem::loss(const ColVector& w, const std::vector<double>& C)
 }
 
 /**
- * Compute the gradient
+ * Compute the L2-regularized gradient descent direction
  *
  *
  */
 ColVector
-L2R_LR_Problem::gradient(const ColVector& w, const std::vector<double>& C)
+L2R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
 {
     const size_t n_samples = dataset_->n_samples;
     const std::vector<double> y = dataset_->y;

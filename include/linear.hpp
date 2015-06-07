@@ -52,10 +52,15 @@ typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
 #ifndef ABS
 template<class T> inline T ABS(T x){ return (x<0?-x:x);}
 #endif
-
+//
 void VOUT(const char* fmt, ...);
-
-
+// very very light-weight and useful structure for <key,value> pair storage
+template <class K, class V>
+struct KeyValue
+{
+    K i;
+    V v;
+};
 /// Dataset parameters
 struct Dataset
 {
@@ -110,18 +115,16 @@ struct Parameter
     /** maximum iteration for iterative method */
     size_t max_epoch;
     /** C */
-    std::vector<double> C;
+    // std::vector<double> C;
+    double base_C;
+    std::vector<KeyValue<double,double> > adjust_C;
 
     Parameter() : solver_type(0.), problem_type(0.){}
 };
 typedef std::shared_ptr<Parameter> ParamPtr;
 typedef std::shared_ptr<Dataset> DatasetPtr;
 
-struct FeatureNode
-{
-    size_t i;
-    double v;
-};
+
 /// Model Parameters
 ///
 /// An important note here is the key part of model - weights:
@@ -134,7 +137,8 @@ struct FeatureNode
 /// previlige to modify it until it will be released by constructor.
 /// All in all, the segmentation fault will not happen here under the
 /// help of class encapsulation.
-/// while secondly, the performance should have not much difference with
+///
+/// Secondly, the performance should have not much difference with
 /// vector but slight better. The linear model always means fast in
 /// industry and that "slightly" is good for all users.
 ///
@@ -176,7 +180,7 @@ private:
     friend class LinearBase;
 };
 
-typedef std::vector<FeatureNode> FeatureVector;
+typedef std::vector<KeyValue<size_t,double> > FeatureVector;
 // symbolic links for short implementation views
 // typedef std::shared_ptr<Model> ModelPtr;
 

@@ -18,7 +18,7 @@ void print_help()
     cout
     << "Usage: predict [predict options] dataset_file model_file outpuf_file" << endl
     << "predict options:" << endl
-    << "-p [--probability]: Output the probability or not, 0 or 1 (default 0)" <<endl
+    << "-p [--probability]: Output the probability or not (no value needed)" <<endl
     << "-e [--estimate_n_samples]: Estimation on number of training samples."
         " Precise estimation can improve the memory usage (default 100)" << endl
     << "-h [--help]: Print usage help information"
@@ -30,18 +30,18 @@ int main(int argc, char **argv)
 
     int probability = 0,estimate_n_samples = 100;
     struct option long_options[] = {
-        {"probability",   required_argument, 0,  'p' },
+        {"probability",   no_argument, 0,  'p' },
         {"estimate_samples",required_argument, 0,  'e' },
         {"help",     no_argument,       0,  'h' },
         {0,0,0,0}
     };
 
     int opt,option_index = 0;
-    while ((opt = getopt_long(argc, argv, "p:e:h",
+    while ((opt = getopt_long(argc, argv, "pe:h",
                               long_options, &option_index)) != -1) {
         switch (opt) {
         case 'p':
-            probability = atoi(optarg);
+            probability = true;
             break;
         case 'e':
             estimate_n_samples = atoi(optarg);
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
     cout << "output file : " << output_file << endl;
 
     std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
-    lr->load_model(std::move(oplin::load_model(model_file)));
+    lr->load_model(std::move(oplin::read_model(model_file)));
     oplin::predict_all(sample_file,output_file, lr, probability, estimate_n_samples);
 
 

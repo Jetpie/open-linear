@@ -17,7 +17,7 @@ GradientDescent::~GradientDescent(){}
  */
 void
 SolverBase::line_search(const ProblemPtr problem, const ParamPtr param,
-                        const ColVector& p, double& alpha)
+                        const Eigen::Ref<ColVector>& p, double& alpha)
 {
 
 }
@@ -30,7 +30,7 @@ SolverBase::line_search(const ProblemPtr problem, const ParamPtr param,
  * @param w
  */
 void
-GradientDescent::solve(ProblemPtr problem, ParamPtr param, ColVector& w)
+GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w, std::vector<double>& C)
 {
     double learning_rate = param->learning_rate;
     size_t epoch = 0;
@@ -39,19 +39,19 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, ColVector& w)
 
     while(epoch < param->max_epoch)
     {
-        double loss = problem->loss(w, param->C);
-        rela_improve = ABS(loss - last_loss);
+        double loss = problem->loss(w, C);
+        rela_improve = oplin::ABS(loss - last_loss);
 
-        // cout << "current loss for epoch " << epoch << " : " << loss << endl;
         VOUT("Epoch(%d) - loss : %f / relative improvement : %f\n" ,
              epoch,loss,rela_improve);
 
+        // stop criteria
         if(rela_improve < param->rela_tol || loss < param->abs_tol)
             break;
         //
         last_loss = loss;
         //
-        w = w - learning_rate * problem->gradient(w, param->C);
+        w.noalias() -= learning_rate * problem->gradient(w, C);
 
         ++epoch;
     }

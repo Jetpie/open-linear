@@ -89,7 +89,7 @@ read_dataset(const string filename, const size_t n_features ,
     DatasetPtr dataset = std::make_shared<Dataset>();
     if(!dataset)
     {
-        cerr << "read_dataset : DatasetPtr allocation failed!, "
+        cerr << "read_dataset : DatasetPtr allocation failed, "
              << __FILE__ << "," << __LINE__ << endl;
         throw(std::bad_alloc());
     }
@@ -109,7 +109,7 @@ read_dataset(const string filename, const size_t n_features ,
     dataset->X = std::make_shared<SpColMatrix>(dimension,n_samples);
     if(!dataset->X)
     {
-        cerr << "read_dataset : SpColMatrixPtr allocation failed!"
+        cerr << "read_dataset : SpColMatrixPtr allocation failed, "
              << __FILE__ << "," << __LINE__ << endl;
         throw(std::bad_alloc());
     }
@@ -121,11 +121,10 @@ read_dataset(const string filename, const size_t n_features ,
 }
 
 /**
- * Save model to file
+ * Save model to file.
  *
- * @param model shared_ptr for model
- * @param filename
- *
+ * @param lb       shared_ptr to LinearBase
+ * @param filename write out file name
  */
 void save_model(std::shared_ptr<LinearBase> lb, const string& filename)
 {
@@ -133,20 +132,22 @@ void save_model(std::shared_ptr<LinearBase> lb, const string& filename)
 }
 
 /**
- * Load model from file.
+ * Load model from file. Make yourself familiar with unique_ptr
+ * argument passing before using this interface
  *
  * @param filename inpute filename for model
  *
- * @return shared_ptr for Model
+ * @return unique_ptr for Model
+ *
  */
-ModelUniPtr load_model(const string& filename)
+ModelUniPtr read_model(const string& filename)
 {
 //    ModelUniPtr model = std::make_shared<Model>();
     ModelUniPtr model = std::unique_ptr<Model>(new Model);
     // sanity check
     if(!model)
     {
-        cerr << "read_dataset : ModelUniPtr allocation failed!"
+        cerr << "read_dataset : ModelUniPtr allocation failed, "
              << __FILE__ << "," << __LINE__ << endl;
         throw(std::bad_alloc());
     }
@@ -192,7 +193,7 @@ ModelUniPtr load_model(const string& filename)
             // sanity check
             if(!W_)
             {
-                cerr << "read_dataset : ModelUniPtr allocation failed!"
+                cerr << "read_dataset : ModelUniPtr allocation failed, "
                      << __FILE__ << "," << __LINE__ << endl;
                 throw(std::bad_alloc());
             }
@@ -212,6 +213,7 @@ ModelUniPtr load_model(const string& filename)
             if(std::getline(infile,line))
             {
                 cerr << "Model error, please check" << endl;
+                throw(std::runtime_error("weights error!"));
             }
         }
         else

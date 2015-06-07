@@ -24,9 +24,9 @@ class SolverBase
 {
 public:
     virtual ~SolverBase();
-    virtual void solve(ProblemPtr, ParamPtr, ColVector&) = 0;
+    virtual void solve(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&, std::vector<double>&) = 0;
     virtual void line_search(const ProblemPtr, const ParamPtr,
-                             const ColVector& p, double& alpha);
+                             const Eigen::Ref<ColVector>& p, double& alpha);
 };
 
 /// Gradint descent optimizer
@@ -35,7 +35,7 @@ class GradientDescent: public SolverBase
 {
 public:
     ~GradientDescent();
-    void solve(ProblemPtr, ParamPtr, ColVector&);
+    void solve(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&, std::vector<double>&);
 };
 
 /// Stochastic gradient descent optimizer
@@ -43,7 +43,6 @@ class StochasticGD: public SolverBase
 {
 public:
     ~StochasticGD();
-    void solve(ProblemPtr, ParamPtr, ColVector&);
 };
 
 /// Limited BFGS optimizer
@@ -51,7 +50,6 @@ class L_BFGS: public SolverBase
 {
 public:
     ~L_BFGS();
-    void solve(ProblemPtr, ParamPtr, ColVector&);
 };
 
 /// Newton trust region optimizer
@@ -65,7 +63,6 @@ class TRON: public SolverBase
 {
 public:
     ~TRON();
-    void solve(ProblemPtr, ParamPtr, ColVector&);
 };
 
 } // oplin

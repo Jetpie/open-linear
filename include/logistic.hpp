@@ -14,6 +14,9 @@ namespace oplin{
 
 class LogisticRegression : public LinearBase
 {
+private:
+void train_ovr(DatasetPtr , ParamPtr , std::vector<double>&,
+               Eigen::Ref<ColVector>, std::vector<double*>&, bool );
 public:
     LogisticRegression() : LinearBase(){};
     explicit LogisticRegression(ModelUniPtr model) : LinearBase(std::move(model)){};

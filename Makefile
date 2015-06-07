@@ -13,7 +13,7 @@ OBJ_DIR := ./obj
 CXXFLAGS := -g -Wall -std=c++0x -O3 -Wno-deprecated-declarations \
 -I$(EIGENROOT) -I$(INC_DIR)/
 ifeq "$(ENABLE_DEBUG)" "yes"
-CXXFLAGS += -D_OPLIN_DEBUG
+CXXFLAGS += -D_OPLIN_DEBUG_
 endif
 
 LDFLAGS :=

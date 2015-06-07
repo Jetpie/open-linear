@@ -30,10 +30,14 @@ void print_help()
     << "-r [--rela_tol]: Relative tolerance between two epochs (default 1e-5)" << endl
     << "-a [--abs_tol]: Absolute tolerance of loss (default 0.1)" << endl
     << "-m [--max_epoch]: Max epoch setting (default 500)" << endl
-    << "-d [--dimension]: Maximum dimension of feature exclude bias term (no default, must be specified)" << endl
+    << "-d [--dimension]: Maximum dimension of feature exclude bias "
+        "term (no default, must be specified)" << endl
     << "-e [--estimate_n_samples]: Estimation on number of training samples."
-        " Precious estimation can improve the memory usage (default 1000)" << endl
+        " Precise estimation can improve the memory usage (default 1000)" << endl
     << "-l [--learning_rate]: Learning rate setting (default 0.01)" << endl
+    << "-C [--penality_base]: C base value (default 1)" << endl
+    << "-c [--adjust]: <-c x y> adjust on C base value for class label 'x' with "
+        "value 'y', which 'y' will be a multiplier on base value C" << endl
     << "-h [--help]: Print usage help information"
     <<endl;
 }
@@ -47,6 +51,7 @@ int main(int argc, char **argv)
     param->abs_tol = 0.1;
     param->max_epoch = 500;
     param->learning_rate = 0.01;
+    param->base_C = 1;
 
 
     int bias = -1;
@@ -61,12 +66,14 @@ int main(int argc, char **argv)
         {"learning_rate",required_argument, 0,  'l' },
         {"dimension",required_argument, 0,  'd' },
         {"estimate_samples",required_argument, 0,  'e' },
+        {"penality_base",required_argument, 0,  'C' },
+        {"adjust",required_argument, 0,  'c' },
         {"help",     no_argument,       0,  'h' },
         {0,0,0,0}
     };
 
     int opt,option_index = 0;
-    while ((opt = getopt_long(argc, argv, "s:p:hb:r:a:m:l:d:e:",
+    while ((opt = getopt_long(argc, argv, "s:p:hb:r:a:m:l:d:e:C:c:",
                               long_options, &option_index)) != -1) {
         switch (opt) {
         case 's':
@@ -91,10 +98,17 @@ int main(int argc, char **argv)
             param->learning_rate = atof(optarg);
             break;
         case 'd':
+            cout << optind << endl;
             n_features = atoi(optarg);
             break;
         case 'e':
             estimate_n_samples = atoi(optarg);
+            break;
+        case 'C':
+            param->base_C = atof(optarg);
+            break;
+        case 'c':
+            param->adjust_C.push_back({atof(optarg),atof(argv[optind++])});
             break;
         case 'h':
             print_help();
@@ -125,9 +139,7 @@ int main(int argc, char **argv)
     std::cout.precision(10);
     // read dataset
     oplin::DatasetPtr dataset = oplin::read_dataset(sample_file, n_features , bias, estimate_n_samples);
-    // set temp soft margin for temporal
-    std::vector<double> C(dataset->n_samples,1.);
-    param->C = C;
+
     // logistic regresion instance
     std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
     // train model

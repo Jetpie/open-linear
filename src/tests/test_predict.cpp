@@ -12,7 +12,7 @@ int main(int argc, char** argv)
     DatasetPtr dataset = read_dataset(filename,dimension,270);
 
     const string model_name = "res/testmodel";
-    ModelUniPtr model = load_model(model_name);
+    ModelUniPtr model = read_model(model_name);
     shared_ptr<LinearBase> lr= make_shared<LogisticRegression>(std::move(model));
 
     //clock_t s;

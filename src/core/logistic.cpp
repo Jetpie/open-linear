@@ -76,9 +76,10 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     }
     catch(std::out_of_range& e)
     {
-        throw(std::logic_error("preprocessing(grouping) dataset fail!"));
+        throw(std::runtime_error("preprocessing(grouping) dataset fail!"));
     }
 
+    // TODO : test the actual memory usage of following manipulations
     // permute the instances
     // -construct the Eigen permutation matrix
     PermutationMatrix<Dynamic,Dynamic> perm_matrix(n_samples);
@@ -87,12 +88,45 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     // -permutation columns
     *(dataset->X) = (*(dataset->X) * perm_matrix).eval();
 
-    // make copy of dataset for training
-    // dataset->X is read-only so no need for deep copy
-
     size_t k;
-    std::shared_ptr<Problem> problem;
-    std::shared_ptr<SolverBase> solver;
+    // construct multiplier for different classes
+    std::vector<double> penality_weights(n_classes, param->base_C);
+    for(std::vector<KeyValue<double,double> >::iterator it = param->adjust_C.begin();
+        it!=param->adjust_C.end(); ++it)
+    {
+        double label = (*it).i;
+        for(k=0;k < n_classes;++k)
+        {
+            if(label == dataset->labels[k])
+                break;
+        }
+        if(k == n_classes)
+        {
+            cout << "Warning : No matched label ["<<label<<"] for adjust_C(ignored), "
+                 << __FILE__ << "," << __LINE__ << endl;
+            continue;
+        }
+        penality_weights[k] *= (*it).v;
+    }
+
+    size_t n_ws = n_classes == 2? 1: n_classes;
+    double* W_ = new double[dimension * n_ws];
+    // sanity check
+    if(!W_)
+    {
+        cerr << "LogisticRegression::train : W_ initialization error (memory), "
+             << __FILE__ << "," << __LINE__ << endl;
+        throw(std::bad_alloc());
+    }
+    // create vector of pointer point to different part of W_
+    std::vector<double*> dimensional_refs(dimension,0);
+
+    for(size_t i=0; i < dimension; ++i)
+    {
+        dimensional_refs[i] = &W_[i * n_ws];
+    }
+
+
     // handle two class classification problem
     if(n_classes == 2)
     {
@@ -100,123 +134,133 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         srand((unsigned int) time(0));
         ColVector w = ColVector::Random(dimension,1) / 2;
 
+        std::vector<double> C(n_samples, penality_weights[1]);
         // rearrange labels
         size_t pos_end = start_idx[0] + count[0];
         for(k=0;k<pos_end;++k)
+        {
             dataset->y[k] = +1;
+
+            // adjust the penality value for positive samples (rare)
+            C[k] = penality_weights[0];
+        }
         for(;k<n_samples;++k)
+        {
             dataset->y[k] = -1;
-        // make problem
-        switch(param->problem_type)
-        {
-            case L1R_LR:
-            {
-                problem = std::make_shared<L1R_LR_Problem>(dataset);
-                break;
-            }
-            case L2R_LR:
-            {
-                problem = std::make_shared<L2R_LR_Problem>(dataset);
-                break;
-            }
-            default:
-                cerr << "LogisticRegression::train : invalid problem type, "
-                     << "Default option (L2R_LR) will be used, "
-                     << __FILE__ << "," << __LINE__ << endl;
-                problem = std::make_shared<L2R_LR_Problem>(dataset);
-                break;
         }
-        // decide solver
-        switch(param->solver_type)
-        {
-            case GD:
-            {
-                solver = std::make_shared<GradientDescent>();
-                break;
-            }
-            default:
-                cerr << "LogisticRegression::train : invalid solver type, "
-                     << "Default option (L_BFGS) will be used, "
-                     << __FILE__ << "," << __LINE__ << endl;
-                // TODO : add default initialization on solver
-                break;
-        }
-        solver->solve(problem, param, w);
 
-        cout << "--------------Dev Print--------------" << endl;
-        cout <<"weights:"<<endl;
-        cout << w <<endl;
-        cout << "-----------------End-----------------" << endl;
-
-        double* W_ = new double[w.rows()*w.cols()];
-        // sanity check
-        if(!W_)
-        {
-            cerr << "LogisticRegression::train : W_ initialization error (memory), "
-                 << __FILE__ << "," << __LINE__ << endl;
-            throw(std::bad_alloc());
-        }
-        for(int i = 0; i < w.rows();++i)
-        {
-            for(int j = 0; j < w.cols(); ++j)
-            {
-                W_[i * w.cols() + j] = w(i,j);
-            }
-        }
-        // load parameter pointer into model, this is good practice if
-        // this is production environment, in which read and write
-        // manipulations are quite sensitive.
-        model->set_weights(W_);
-        model->bias = dataset->bias;
-        if(model->bias > 0)
-        {
-            double* bias_values = new double[w.cols()];
-            if(!bias_values)
-            {
-                cerr << "LogisticRegression::train : bias initialization error (memory), "
-                     << __FILE__ << "," << __LINE__ << endl;
-                throw(std::bad_alloc());
-            }
-            // store w_0 * bias term
-            for(int i = 0; i < w.cols();++i)
-            {
-                bias_values[i] = dataset->bias * w(w.rows()-1,i);
-            }
-            model->set_bias_values(bias_values);
-        }
+        train_ovr(dataset, param, C, w, dimensional_refs,false);
 
     }
+    // multiple class using one-vs-rest strategy
     else
     {
+        // TODO: implementation
         cout << ">2classes" << endl;
+    }
+
+    // load parameter pointer into model, this is good practice if
+    // this is production environment, in which read and write
+    // manipulations are quite sensitive.
+    model->set_weights(W_);
+    model->bias = dataset->bias;
+    if(model->bias > 0)
+    {
+        double* bias_values = new double[n_ws];
+        if(!bias_values)
+        {
+            cerr << "LogisticRegression::train : bias initialization error (memory), "
+                 << __FILE__ << "," << __LINE__ << endl;
+            delete [] W_;
+            throw(std::bad_alloc());
+        }
+        double* W_temp = dimensional_refs[dimension-1];
+        // store w_0 * bias term
+        for(size_t i = 0; i < n_ws;++i)
+        {
+            bias_values[i] = dataset->bias * W_temp[i];
+        }
+        model->set_bias_values(bias_values);
     }
     // Finally, pass model variable to member model
     this->load_model( std::move(model) );
+}
 
+/**
+ * Train One-vs-Rest
+ *
+ *
+ */
+void
+LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<double>& C,
+                              Eigen::Ref<ColVector> w, std::vector<double*>& dimensional_refs, bool end)
+{
+    std::shared_ptr<Problem> problem;
+    std::shared_ptr<SolverBase> solver;
+    // make problem
+    switch(param->problem_type)
+    {
+        case L1R_LR:
+        {
+            problem = std::make_shared<L1R_LR_Problem>(dataset);
+            break;
+        }
+        case L2R_LR:
+        {
+            problem = std::make_shared<L2R_LR_Problem>(dataset);
+            break;
+        }
+        default:
+            cerr << "LogisticRegression::train_ovr : invalid problem type, "
+                 << "Default option (L2R_LR) will be used, "
+                 << __FILE__ << "," << __LINE__ << endl;
+            problem = std::make_shared<L2R_LR_Problem>(dataset);
+            break;
+    }
 
-    /*
-    A benchmark test for different permuation strategies
-    // start = clock();
-    // SpColMatrix perm_done(dimension,n_samples);
-    // for(size_t i = 0; i < n_samples ;++i)
-    //     perm_done.col(i) = dataset->X->col(perm_idx[i]);
-    // cout << "time perm_done:" << float(clock() -start)/CLOCKS_PER_SEC << endl;
-    */
-    // for(size_t i=0;i<n_samples;++i)
-    // {
-    //     cout << perm_idx[i] << ",";
-    // }
-    // cout << endl;
-    // for(size_t i=0;i<n_classes;++i)
-    // {
-    //     cout << start_idx[i] << ",";
-    // }
-    // cout << endl;
-    // for(size_t i=0;i<n_classes;++i)
-    // {
-    //     cout << count[i] << ",";
-    // }
-    // cout << endl;
+    // decide solver
+    switch(param->solver_type)
+    {
+        case GD:
+        {
+            solver = std::make_shared<GradientDescent>();
+            break;
+        }
+        default:
+            cerr << "LogisticRegression::train : invalid solver type, "
+                 << "Default option (L_BFGS) will be used, "
+                 << __FILE__ << "," << __LINE__ << endl;
+            // TODO : add default initialization on solver
+            break;
+    }
+
+    solver->solve(problem, param, w, C);
+
+    cout << "--------------Dev Print--------------" << endl;
+    cout <<"weights:"<<endl;
+    cout << w <<endl;
+    cout << "-----------------End-----------------" << endl;
+    size_t i=0;
+    // if train the last column of W_, stop pre-increase on pointer
+    // references
+    if(end)
+    {
+        for(std::vector<double*>::iterator it(dimensional_refs.begin());
+            it!=dimensional_refs.end();++it)
+        {
+            *(*it) = w(i++);
+        }
+    }
+    else
+    {
+        for(std::vector<double*>::iterator it(dimensional_refs.begin());
+            it!=dimensional_refs.end();++it)
+        {
+            *(*it) = w(i++);
+            ++(*it);
+        }
+    }
+    return;
 }
 
 } // oplin
