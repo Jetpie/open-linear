@@ -36,7 +36,7 @@ void print_help()
         " Precise estimation can improve the memory usage (default 1000)" << endl
     << "-l [--learning_rate]: Learning rate setting (default 0.01)" << endl
     << "-C [--penality_base]: C base value (default 1)" << endl
-    << "-c [--adjust]: <-c x y> adjust on C base value for class label 'x' with "
+    << "-c [--adjust]: <-c x1 y1 x2 y2> adjust on C base value for class label 'x' with "
         "value 'y', which 'y' will be a multiplier on base value C" << endl
     << "-h [--help]: Print usage help information"
     <<endl;
@@ -98,7 +98,6 @@ int main(int argc, char **argv)
             param->learning_rate = atof(optarg);
             break;
         case 'd':
-            cout << optind << endl;
             n_features = atoi(optarg);
             break;
         case 'e':
@@ -109,6 +108,20 @@ int main(int argc, char **argv)
             break;
         case 'c':
             param->adjust_C.push_back({atof(optarg),atof(argv[optind++])});
+            while(1)
+            {
+                if(argv[optind][0] == '-' || argc - optind <= 2 )
+                    break;
+                // -c x1 y1 x2 -m should not happen
+                // -c x1 y1 x2 input_file model_file should not happen
+                if(argc - optind == 3 || argv[optind+1][0] == '-')
+                {
+                    cerr << "[Error Message] use -c option with: -c x1 y1 x2 y2 ..." <<endl;
+                    print_help();
+                    return EXIT_FAILURE;
+                }
+                param->adjust_C.push_back({atof(argv[optind++]),atof(argv[optind++])});
+            }
             break;
         case 'h':
             print_help();
