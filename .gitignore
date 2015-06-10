@@ -18,3 +18,7 @@ src/trash
 
 # Ignore doc directory
 doc/
+
+# Ignore shells for fast command interface
+train.sh
+predict.sh

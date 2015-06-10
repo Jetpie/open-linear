@@ -36,7 +36,7 @@ void print_help()
         " Precise estimation can improve the memory usage (default 1000)" << endl
     << "-l [--learning_rate]: Learning rate setting (default 0.01)" << endl
     << "-C [--penality_base]: C base value (default 1)" << endl
-    << "-c [--adjust]: <-c x1 y1 x2 y2> adjust on C base value for class label 'x' with "
+    << "-c [--adjust]: <-c x1 y1 x2 y2 ...> adjust on C base value for class label 'x' with "
         "value 'y', which 'y' will be a multiplier on base value C" << endl
     << "-h [--help]: Print usage help information"
     <<endl;
@@ -156,7 +156,9 @@ int main(int argc, char **argv)
     // logistic regresion instance
     std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
     // train model
+    clock_t start = clock();
     lr->train(dataset, param);
+    std::cout << "time train:" << float(clock() -start)/CLOCKS_PER_SEC << std::endl;
     lr->export_model_to_file(model_file);
 
 
