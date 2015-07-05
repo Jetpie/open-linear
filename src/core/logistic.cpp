@@ -76,7 +76,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     }
     catch(std::out_of_range& e)
     {
-        throw(std::runtime_error("preprocessing(grouping) dataset fail!"));
+        throw(std::runtime_error("Preprocessing(grouping) dataset fail!"));
     }
 
     // TODO : test the actual memory usage of following manipulations
@@ -156,7 +156,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     else
     {
         // TODO: implementation
-        cout << ">2classes" << endl;
+        cout << ">2 classes" << endl;
     }
 
     // load parameter pointer into model, this is good practice if

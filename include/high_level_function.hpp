@@ -29,26 +29,17 @@ using std::string;
  * @param n_entries estimated number of entries of datasets. Will run as
  *                  normal though not accurate but may cause memory error
  *                  because no enough space is reserved.
- * @param dimension dimension of feature space
  *
  * @return shared_ptr to loaded dataset
  */
 DatasetPtr
-read_dataset(const string filename, const size_t n_features ,
-             const double bias = -1, const size_t n_entries = 1000)
+read_dataset(const string filename, const double bias = -1, const size_t n_entries = 1000)
 {
     //
     size_t n_samples = 0;
     // dimension is the length of parameters w, add w_0 if bias is applied
-    size_t dimension;
-    if(bias > 0)
-    {
-        dimension = n_features + 1;
-    }
-    else
-    {
-        dimension = n_features;
-    }
+    size_t dimension = 0;
+    size_t n_features = 0;
 
     std::vector<double> y;
     y.reserve(n_entries);
@@ -76,15 +67,27 @@ read_dataset(const string filename, const size_t n_features ,
             int i;
             float v_ij;
             sscanf(item.c_str(),"%d:%f",&i,&v_ij);
+
+            // feature dimension should be at least 1
+            if(i < 1)
+            {
+                cerr << "read_dataset : Bad dimension value " << i
+                     << " on line " << (n_samples+1) << ", "
+                     << __FILE__ << "," << __LINE__ << endl;
+                throw(std::exception());
+            }
+
+            // update n_feature
+            if((size_t)i > n_features)
+                n_features = i;
+
             // j = n_samples;
             triplets.push_back(Tri(i-1,n_samples,v_ij));
         }
-        // concantenate bias to feature space if bias term is applied
-        if(bias > 0)
-            triplets.push_back(Tri(dimension-1, n_samples, bias));
         ++n_samples;
     }
     infile.close();
+
     // assign dataset model
     DatasetPtr dataset = std::make_shared<Dataset>();
     if(!dataset)
@@ -93,12 +96,22 @@ read_dataset(const string filename, const size_t n_features ,
              << __FILE__ << "," << __LINE__ << endl;
         throw(std::bad_alloc());
     }
+
+    VOUT("Auto detected n_features : %d\n" ,n_features);
+
     if(bias > 0)
     {
+        dimension = n_features + 1;
         dataset->bias = bias;
+        // add bias term
+        for(size_t i = 0; i < n_samples; ++i)
+        {
+            triplets.push_back(Tri(dimension-1,i, bias));
+        }
     }
     else
     {
+        dimension = n_features;
         dataset->bias = -1;
     }
     dataset->n_samples = n_samples;

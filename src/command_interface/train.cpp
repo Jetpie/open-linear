@@ -30,8 +30,6 @@ void print_help()
     << "-r [--rela_tol]: Relative tolerance between two epochs (default 1e-5)" << endl
     << "-a [--abs_tol]: Absolute tolerance of loss (default 0.1)" << endl
     << "-m [--max_epoch]: Max epoch setting (default 500)" << endl
-    << "-d [--dimension]: Maximum dimension of feature exclude bias "
-        "term (no default, must be specified)" << endl
     << "-e [--estimate_n_samples]: Estimation on number of training samples."
         " Precise estimation can improve the memory usage (default 1000)" << endl
     << "-l [--learning_rate]: Learning rate setting (default 0.01)" << endl
@@ -55,7 +53,7 @@ int main(int argc, char **argv)
 
 
     int bias = -1;
-    size_t n_features = 0, estimate_n_samples = 1000;
+    size_t estimate_n_samples = 1000;
     struct option long_options[] = {
         {"solver",   required_argument, 0,  's' },
         {"problem",  required_argument, 0,  'p' },
@@ -64,7 +62,6 @@ int main(int argc, char **argv)
         {"abs_tol",  required_argument, 0,  'a' },
         {"max_epoch",required_argument, 0,  'm' },
         {"learning_rate",required_argument, 0,  'l' },
-        {"dimension",required_argument, 0,  'd' },
         {"estimate_samples",required_argument, 0,  'e' },
         {"penality_base",required_argument, 0,  'C' },
         {"adjust",required_argument, 0,  'c' },
@@ -73,7 +70,7 @@ int main(int argc, char **argv)
     };
 
     int opt,option_index = 0;
-    while ((opt = getopt_long(argc, argv, "s:p:hb:r:a:m:l:d:e:C:c:",
+    while ((opt = getopt_long(argc, argv, "s:p:hb:r:a:m:l:e:C:c:",
                               long_options, &option_index)) != -1) {
         switch (opt) {
         case 's':
@@ -96,9 +93,6 @@ int main(int argc, char **argv)
             break;
         case 'l':
             param->learning_rate = atof(optarg);
-            break;
-        case 'd':
-            n_features = atoi(optarg);
             break;
         case 'e':
             estimate_n_samples = atoi(optarg);
@@ -136,7 +130,7 @@ int main(int argc, char **argv)
     }
 
     // +2 for train sample file and model file
-    if (optind + 2 != argc || !n_features )
+    if (optind + 2 != argc)
     {
         print_help();
         return EXIT_FAILURE;
@@ -151,7 +145,7 @@ int main(int argc, char **argv)
     // set std::cout precision
     std::cout.precision(10);
     // read dataset
-    oplin::DatasetPtr dataset = oplin::read_dataset(sample_file, n_features , bias, estimate_n_samples);
+    oplin::DatasetPtr dataset = oplin::read_dataset(sample_file, bias, estimate_n_samples);
 
     // logistic regresion instance
     std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();

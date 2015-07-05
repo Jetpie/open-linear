@@ -8,9 +8,7 @@ int main(int argc, char** argv)
     std::cout.precision(10);
     string filename = "res/sample";
     string output = "res/output";
-    size_t dimension = 13;
-    DatasetPtr dataset = read_dataset(filename,dimension,270);
-
+    DatasetPtr dataset = read_dataset(filename,-1,270);
     const string model_name = "res/testmodel";
     ModelUniPtr model = read_model(model_name);
     shared_ptr<LinearBase> lr= make_shared<LogisticRegression>(std::move(model));

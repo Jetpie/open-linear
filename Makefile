@@ -10,8 +10,10 @@ INC_DIR := ./include
 OBJ_DIR := ./obj
 
 # FLAGS
-CXXFLAGS := -g -Wall -std=c++0x -O3 -Wno-deprecated-declarations \
+CXXFLAGS := -g -Wall -std=c++11 -O3 \
+-Wno-deprecated-declarations \
 -I$(EIGENROOT) -I$(INC_DIR)/
+
 ifeq "$(ENABLE_DEBUG)" "yes"
 CXXFLAGS += -D_OPLIN_DEBUG_
 endif
