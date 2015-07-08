@@ -36,15 +36,21 @@ endef
 
 SOURCES:= $(wildcard $(SRC_DIR)/core/*.cpp)
 OBJECTS:= $(patsubst $(SRC_DIR)/core/%,$(OBJ_DIR)/%,$(SOURCES:.cpp=.o))
-BIN_SRC:= $(wildcard $(SRC_DIR)/tests/*.cpp $(SRC_DIR)/command_interface/*.cpp)
-BIN_TGT:= $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(BIN_SRC))))
-BIN_CMD = $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(wildcard $(SRC_DIR)/command_interface/*.cpp)) ) )
+# BIN_SRC:= $(wildcard $(SRC_DIR)/tests/*.cpp $(SRC_DIR)/command_interface/*.cpp)
+# BIN_TGT:= $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(BIN_SRC))))
+# BIN_CMD = $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(wildcard $(SRC_DIR)/command_interface/*.cpp)) ) )
+
 # generate the all-dir target
 $(eval $(call gendir, dirs, $(BIN_DIR) $(OBJ_DIR) ))
 
 .PRECIOUS: $(OBJECTS)
-all: $(BIN_TGT)
-interface: $(BIN_CMD)
+# all: $(BIN_TGT)
+# interface: $(BIN_CMD)
+all: interface test
+
+interface: $(BIN_DIR)/train $(BIN_DIR)/predict
+test: $(addprefix $(BIN_DIR)/, $(patsubst %.cpp,%,$(notdir $(wildcard $(SRC_DIR)/tests/*.cpp)) ) )
+
 
 $(BIN_DIR)/%: $(SRC_DIR)/tests/%.cpp $(OBJECTS) $(dirs)
 	@echo "	Linking..."

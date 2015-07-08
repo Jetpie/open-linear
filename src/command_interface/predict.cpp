@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
     std::shared_ptr<oplin::LinearBase> lr= std::make_shared<oplin::LogisticRegression>();
     lr->load_model(std::move(oplin::read_model(model_file)));
-    oplin::predict_all(sample_file,output_file, lr, probability, estimate_n_samples);
+    oplin::predict_all(sample_file,output_file, lr, "\t", probability, estimate_n_samples);
 
 
     return EXIT_SUCCESS;

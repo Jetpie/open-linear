@@ -35,6 +35,6 @@ int main(int argc, char** argv)
              << label << " " << p[0] << "," << p[1] << endl;
     }
 
-    predict_all(filename,output,lr,true);
+    predict_all(filename,output,lr," ",true);
 
 }

@@ -150,7 +150,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
         }
 
         train_ovr(dataset, param, C, w, dimensional_refs,false);
-
+        VOUT("#non-zeros / #features : %d / %d\n",(w.array() != 0).count(), dimension);
     }
     // multiple class using one-vs-rest strategy
     else

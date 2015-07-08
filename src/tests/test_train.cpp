@@ -35,6 +35,6 @@ int main(int argc, char** argv)
 
     lr->train(dataset, param);
 
-    predict_all(filename,result,lr,true);
+    predict_all(filename,result,lr," ",true);
 
 }

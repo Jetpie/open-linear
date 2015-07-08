@@ -255,7 +255,7 @@ ModelUniPtr read_model(const string& filename)
  *                         this will automatically be recomputed if exceeds.
  */
 void predict_all(const string& input, const string& output, std::shared_ptr<LinearBase> lb,
-                 bool flag_probability = false, size_t estimate_n = 100)
+                 std::string delim = " ", bool flag_probability = false, size_t estimate_n = 100)
 {
     if(!lb->is_trained())
     {
@@ -341,7 +341,7 @@ void predict_all(const string& input, const string& output, std::shared_ptr<Line
             pred_label = lb->predict_proba(x,p);
             outfile << pred_label;
             for(size_t i = 0; i < n_classes;++i)
-                outfile << " " << p[i];
+                outfile << delim << p[i];
             outfile << "\n";
         }
         else
