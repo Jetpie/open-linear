@@ -10,7 +10,7 @@ INC_DIR := ./include
 OBJ_DIR := ./obj
 
 # FLAGS
-CXXFLAGS := -g -Wall -std=c++11 -O3 \
+CXXFLAGS := -g -Wall -std=c++11 -O3\
 -Wno-deprecated-declarations \
 -I$(EIGENROOT) -I$(INC_DIR)/
 

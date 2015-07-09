@@ -10,6 +10,8 @@
 
 #include "linear.hpp"
 
+#include <stdio.h>
+#include <string.h>
 #include <fstream>
 #include <sstream>
 #include <set>
@@ -66,8 +68,9 @@ read_dataset(const string filename, const double bias = -1, const size_t n_entri
         {
             int i;
             float v_ij;
-            sscanf(item.c_str(),"%d:%f",&i,&v_ij);
-
+            // sscanf(item.c_str(),"%d:%f",&i,&v_ij);
+            i = atoi(strtok(const_cast<char*>(item.c_str()),":") );
+            v_ij = atof(strtok(NULL,":" ));
             // feature dimension should be at least 1
             if(i < 1)
             {
@@ -212,20 +215,18 @@ ModelUniPtr read_model(const string& filename)
             }
             for(size_t i =0;i < model->dimension; ++i)
             {
-                std::getline(infile,line);
-                std::stringstream ss(line);
-                string item;
                 for(size_t j =0; j < cols; ++j)
                 {
-                    std::getline(ss,item,' ');
-                    W_[i*cols + j] = std::stod(item);
+                    infile >> W_[i*cols + j];
                 }
             }
+            // put final "\n" into buffer
+            infile >> line;
             model->set_weights(W_);
-
             if(std::getline(infile,line))
             {
-                cerr << "Model error, please check" << endl;
+                cerr << "Model error, please check!" << endl;
+                cerr << "Hint : dimension = n_features + 1 when bias > 0!" << endl;
                 throw(std::runtime_error("weights error!"));
             }
         }
@@ -324,7 +325,9 @@ void predict_all(const string& input, const string& output, std::shared_ptr<Line
         {
             int i;
             float v_ij;
-            sscanf(item.c_str(),"%d:%f",&i,&v_ij);
+            // sscanf(item.c_str(),"%d:%f",&i,&v_ij);
+            i = atoi(strtok(const_cast<char*>(item.c_str()),":") );
+            v_ij = atof(strtok(NULL,":" ));
             max_n_feature++;
             if(max_n_feature > estimate_n)
             {
