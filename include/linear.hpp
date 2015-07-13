@@ -199,10 +199,9 @@ protected:
     // model instance
     ModelUniPtr model_;
     bool trained_;
-    // parameter instance
-    ParamPtr parameter_;
     void predict_WTx(const FeatureVector, std::vector<double>&);
-
+    void preprocess_data(const DatasetPtr, std::vector<size_t>&,
+                         std::vector<size_t>&, std::vector<size_t>&);
 public:
 
     LinearBase(void);
@@ -218,9 +217,6 @@ public:
     virtual void train(const DatasetPtr, const ParamPtr) = 0;
     virtual double predict(const FeatureVector);
     virtual double predict_proba(const FeatureVector, std::vector<double>&);
-
-    void preprocess_data(const DatasetPtr, std::vector<size_t>&,
-                         std::vector<size_t>&, std::vector<size_t>&);
 };
 
 } // oplin

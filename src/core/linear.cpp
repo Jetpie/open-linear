@@ -222,9 +222,7 @@ LinearBase::predict_WTx(FeatureVector x, std::vector<double>& WTx)
     // weights for current feature dimension
     double* cur_w;
     // compute W^T x
-    // #pragma omp parallel num_threads(4)
     {
-        // #pragma omp for
         for(size_t n = 0; n<x.size(); ++n)
         {
             cur_w = &w[(x[n].i) *n_ws];

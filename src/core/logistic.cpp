@@ -42,7 +42,6 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     size_t n_classes = dataset->n_classes;
 
     // initialize model
-    // ModelUniPtr model = std::make_shared<Model>();
     ModelUniPtr model(new Model());
     // sanity check
     if(!model)
@@ -118,15 +117,6 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
              << __FILE__ << "," << __LINE__ << endl;
         throw(std::bad_alloc());
     }
-    // create vector of pointer point to different part of W_
-    std::vector<double*> dimensional_refs(dimension,0);
-
-    for(size_t i=0; i < dimension; ++i)
-    {
-        dimensional_refs[i] = &W_[i * n_ws];
-    }
-
-
     // handle two class classification problem
     if(n_classes == 2)
     {
@@ -149,7 +139,9 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
             dataset->y[k] = -1;
         }
 
-        train_ovr(dataset, param, C, w, dimensional_refs,false);
+        train_ovr(dataset, param, C, w);
+        for(size_t idx = 0; idx < dimension ;++idx)
+            W_[idx] = w(idx);
         VOUT("#non-zeros / #features : %d / %d\n",(w.array() != 0).count(), dimension);
     }
     // multiple class using one-vs-rest strategy
@@ -174,11 +166,10 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
             delete [] W_;
             throw(std::bad_alloc());
         }
-        double* W_temp = dimensional_refs[dimension-1];
         // store w_0 * bias term
         for(size_t i = 0; i < n_ws;++i)
         {
-            bias_values[i] = dataset->bias * W_temp[i];
+            bias_values[i] = dataset->bias * W_[dimension*(i+1)-1];
         }
         model->set_bias_values(bias_values);
     }
@@ -192,8 +183,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
  *
  */
 void
-LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<double>& C,
-                              Eigen::Ref<ColVector> w, std::vector<double*>& dimensional_refs, bool end)
+LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<double>& C, Eigen::Ref<ColVector> w)
 {
     std::shared_ptr<Problem> problem;
     std::shared_ptr<SolverBase> solver;
@@ -240,26 +230,6 @@ LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<do
     cout <<"weights:"<<endl;
     cout << w <<endl;
     cout << "-----------------End-----------------" << endl;
-    size_t i=0;
-    // if train the last column of W_, stop pre-increase on pointer
-    // references
-    if(end)
-    {
-        for(std::vector<double*>::iterator it(dimensional_refs.begin());
-            it!=dimensional_refs.end();++it)
-        {
-            *(*it) = w(i++);
-        }
-    }
-    else
-    {
-        for(std::vector<double*>::iterator it(dimensional_refs.begin());
-            it!=dimensional_refs.end();++it)
-        {
-            *(*it) = w(i++);
-            ++(*it);
-        }
-    }
     return;
 }
 
