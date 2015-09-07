@@ -1,7 +1,7 @@
 # ENV
 CXX = g++
 
-EIGENROOT ?= $(HOME)/user-libs/eigen-3.2.4
+EIGENROOT ?= $(HOME)/user-libs/eigen-3.2.5
 
 BIN_DIR := ./bin
 SRC_DIR := ./src
@@ -11,8 +11,10 @@ OBJ_DIR := ./obj
 
 # FLAGS
 CXXFLAGS := -g -Wall -std=c++11 -O3\
--Wno-deprecated-declarations \
--I$(EIGENROOT) -I$(INC_DIR)/
+-I$(INC_DIR)/ -I$(LIB_DIR)/eigen/
+#-Wno-deprecated-declarations \
+#-I$(EIGENROOT)
+
 
 ifeq "$(ENABLE_DEBUG)" "yes"
 CXXFLAGS += -D_OPLIN_DEBUG_

@@ -25,8 +25,8 @@ class SolverBase
 public:
     virtual ~SolverBase();
     virtual void solve(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&, std::vector<double>&) = 0;
-    virtual void line_search(const ProblemPtr, const ParamPtr,
-                             const Eigen::Ref<ColVector>& p, double& alpha);
+    virtual double line_search(const ProblemPtr, const Eigen::Ref<ColVector>&, std::vector<double>&,
+                               const Eigen::Ref<ColVector>&, const Eigen::Ref<ColVector>&, const double);
 };
 
 /// Gradint descent optimizer
@@ -45,11 +45,11 @@ public:
     ~StochasticGD();
 };
 
-/// Limited BFGS optimizer
 class L_BFGS: public SolverBase
 {
 public:
     ~L_BFGS();
+    void solve(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&, std::vector<double>&);
 };
 
 /// Newton trust region optimizer

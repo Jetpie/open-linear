@@ -10,21 +10,43 @@ using namespace Eigen;
 SolverBase::~SolverBase(){}
 GradientDescent::~GradientDescent(){}
 /**
- * Line search
+ * Line search:
+ *   The basic line search form would be: x_{k+1} = x_k + p_k * alpha_k
+ *   The typical form of p will be p_k = -B_k^(-1) * grad(f_k)
+ *   B_k is always a symmetric and nonsingular matrix.
  *
- *
- *
+ * @param problem
+ * @param param
+ * @param p
+ * @param alpha
  */
-void
-SolverBase::line_search(const ProblemPtr problem, const ParamPtr param,
-                        const Eigen::Ref<ColVector>& p, double& alpha)
+double
+SolverBase::line_search(ProblemPtr problem, const Eigen::Ref<ColVector>& w, std::vector<double>& C,
+                        const Eigen::Ref<ColVector>& grad, const Eigen::Ref<ColVector>& p, const double loss)
 {
-
+    double alpha = 1.0;
+    const double c1 = 1e-4;
+    const double ro = 0.5;
+    size_t epoch = 0;
+    const size_t max_epoch = 10;
+    // precompute
+    const double sufficient_desc = loss + (double)(grad.transpose() * p) *c1*alpha;
+    // armijo condition solved by backtracing approach
+    // f(x_k + a*p_k) <= f(x_k) + c*a*Delta(f_k)^T * p_k
+    while(epoch++ < max_epoch)
+    {
+        if(problem->loss(w + alpha * p, C) <= sufficient_desc)
+            break;
+        alpha *= ro;
+    }
+    VOUT("#iter(line search): %d\n",epoch);
+    return alpha;
 }
 
 
 /**
  * Solve the problem on dataset with parameters
+ *
  * @param problem
  * @param param
  * @param w
@@ -32,28 +54,31 @@ SolverBase::line_search(const ProblemPtr problem, const ParamPtr param,
 void
 GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w, std::vector<double>& C)
 {
-    double learning_rate = param->learning_rate;
     size_t epoch = 0;
     double last_loss = 0;
     double rela_improve = 0;
-
-    while(epoch < param->max_epoch)
+    double alpha;
+    while(epoch++ < param->max_epoch)
     {
         double loss = problem->loss(w, C);
         rela_improve = oplin::ABS(loss - last_loss);
 
-        VOUT("Epoch(%d) - loss : %f / relative improvement : %f\n" ,
+        VOUT("Epoch(%d) - loss : %f | relative improvement : %f | " ,
              epoch,loss,rela_improve);
 
         // stop criteria
         if(rela_improve < param->rela_tol || loss < param->abs_tol)
+        {
+            VOUT("\n");
             break;
+        }
         //
         last_loss = loss;
-        //
-        w.noalias() -= learning_rate * problem->gradient(w, C);
-
-        ++epoch;
+        // for steepest gradient descent method, p is simply gradient direction
+        ColVector grad = problem->gradient(w,C);
+        ColVector p = (-1) * grad;
+        alpha = this->line_search(problem, w, C, grad, p, loss);
+        w.noalias() += alpha * p;
     }
 }
 
