@@ -13,7 +13,7 @@ namespace oplin
 L_BFGS::~L_BFGS(){}
 
 void
-L_BFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w, std::vector<double>& C)
+L_BFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 {
 
 }

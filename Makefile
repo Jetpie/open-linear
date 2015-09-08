@@ -16,7 +16,7 @@ CXXFLAGS := -g -Wall -std=c++11 -O3\
 #-I$(EIGENROOT)
 
 
-ifeq "$(ENABLE_DEBUG)" "yes"
+ifneq "$(DISABLE_DEBUG)" "yes"
 CXXFLAGS += -D_OPLIN_DEBUG_
 endif
 

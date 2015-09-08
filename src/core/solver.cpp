@@ -21,21 +21,30 @@ GradientDescent::~GradientDescent(){}
  * @param alpha
  */
 double
-SolverBase::line_search(ProblemPtr problem, const Eigen::Ref<ColVector>& w, std::vector<double>& C,
-                        const Eigen::Ref<ColVector>& grad, const Eigen::Ref<ColVector>& p, const double loss)
+SolverBase::line_search(ProblemPtr problem, const Eigen::Ref<ColVector>& w, const Eigen::Ref<ColVector>& grad,
+                        const Eigen::Ref<ColVector>& p, const double loss)
 {
     double alpha = 1.0;
     const double c1 = 1e-4;
     const double ro = 0.5;
     size_t epoch = 0;
     const size_t max_epoch = 10;
+    const double dir_dirivative = grad.transpose() * p;
+    // check p is descent direction
+    if(dir_dirivative >= 0)
+    {
+        VOUT("\n");
+        cerr << "SolverBase::line_search : non-descent direction is chosen in line search ("
+             << __FILE__ << ", line " << __LINE__ << ")."<< endl;
+        throw(std::runtime_error("non-descent direction is chosen in line search, check gradient!"));
+    }
     // precompute
-    const double sufficient_desc = loss + (double)(grad.transpose() * p) *c1*alpha;
+    const double sufficient_desc = loss + dir_dirivative * c1 * alpha;
     // armijo condition solved by backtracing approach
     // f(x_k + a*p_k) <= f(x_k) + c*a*Delta(f_k)^T * p_k
     while(epoch++ < max_epoch)
     {
-        if(problem->loss(w + alpha * p, C) <= sufficient_desc)
+        if(problem->loss(w + alpha * p) <= sufficient_desc)
             break;
         alpha *= ro;
     }
@@ -52,7 +61,7 @@ SolverBase::line_search(ProblemPtr problem, const Eigen::Ref<ColVector>& w, std:
  * @param w
  */
 void
-GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w, std::vector<double>& C)
+GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 {
     size_t epoch = 0;
     double last_loss = 0;
@@ -60,7 +69,7 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
     double alpha;
     while(epoch++ < param->max_epoch)
     {
-        double loss = problem->loss(w, C);
+        double loss = problem->loss(w);
         rela_improve = oplin::ABS(loss - last_loss);
 
         VOUT("Epoch(%d) - loss : %f | relative improvement : %f | " ,
@@ -75,9 +84,9 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
         //
         last_loss = loss;
         // for steepest gradient descent method, p is simply gradient direction
-        ColVector grad = problem->gradient(w,C);
+        ColVector grad = problem->gradient(w);
         ColVector p = (-1) * grad;
-        alpha = this->line_search(problem, w, C, grad, p, loss);
+        alpha = this->line_search(problem, w, grad, p, loss);
         w.noalias() += alpha * p;
     }
 }

@@ -20,10 +20,18 @@ using std::cout;
 using std::endl;
 using std::cerr;
 using namespace Eigen;
+Problem::Problem(DatasetPtr dataset, const std::vector<double>& C) : dataset_(dataset)
+{
+    // use swap trick
+    std::vector<double>(C).swap(C_);
+    // C_ = C;
+}
+
+
 /*********************************************************************
  *                                  L1-Regularized Logistic Regression
  *********************************************************************/
-L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
+L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : Problem(dataset, C)
 {
     g_ = ColVector(dataset->n_samples, 1);
 }
@@ -34,11 +42,10 @@ L1R_LR_Problem::~L1R_LR_Problem(){}
  * Compute the L1-regularized loss functionn
  *
  * @param w weights
- * @param C
  *
  */
 double
-L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
+L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
 {
     // loss value, initilization
     // l1-norm regularization term
@@ -52,7 +59,7 @@ L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<dou
 
     // loss function : negative log likelihood
     for(size_t i = 0; i < n_samples; ++i)
-        f += C[i] * log( 1 + exp(-y[i] * g_(i) ) );
+        f += C_[i] * log( 1 + exp(-y[i] * g_(i) ) );
 
 
     return f;
@@ -62,10 +69,9 @@ L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<dou
  * Compute the L1-regularized gradient descent direction
  *
  * @param w weights
- * @param C
  */
 ColVector
-L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
+L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w)
 {
     const size_t n_samples = dataset_->n_samples;
     const std::vector<double> y = dataset_->y;
@@ -75,7 +81,7 @@ L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector
         // h_w(y_i,x_i) - sigmoid function
         g_(i) = 1 / ( 1 + exp( -y[i] * g_(i) ) );
         // C * (h_w(y_i,x_i) - 1) * y[i]
-        g_(i) = C[i] * (g_(i) - 1) * y[i];
+        g_(i) = C_[i] * (g_(i) - 1) * y[i];
 
     }
 
@@ -86,7 +92,7 @@ L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector
 /*********************************************************************
  *                                  L2-Regularized Logistic Regression
  *********************************************************************/
-L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset) : dataset_(dataset)
+L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : Problem(dataset, C)
 {
     g_ = ColVector(dataset->n_samples, 1);
 }
@@ -101,7 +107,7 @@ L2R_LR_Problem::~L2R_LR_Problem(){}
  *
  */
 double
-L2R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
+L2R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
 {
     // loss value, initilization
     // l2-norm regularization term
@@ -115,7 +121,7 @@ L2R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<dou
 
     // loss function : negative log likelihood
     for(size_t i = 0; i < n_samples; ++i)
-        f += C[i] * log( 1 + exp(-y[i] * g_(i) ) );
+        f += C_[i] * log( 1 + exp(-y[i] * g_(i) ) );
 
 
     return f;
@@ -127,7 +133,7 @@ L2R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w, const std::vector<dou
  *
  */
 ColVector
-L2R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector<double>& C)
+L2R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w)
 {
     const size_t n_samples = dataset_->n_samples;
     const std::vector<double> y = dataset_->y;
@@ -137,7 +143,7 @@ L2R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, const std::vector
         // h_w(y_i,x_i) - sigmoid function
         g_(i) = 1 / ( 1 + exp( -y[i] * g_(i) ) );
         // C * (h_w(y_i,x_i) - 1) * y[i]
-        g_(i) = C[i] * (g_(i) - 1) * y[i];
+        g_(i) = C_[i] * (g_(i) - 1) * y[i];
 
     }
 

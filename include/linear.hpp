@@ -139,7 +139,7 @@ typedef std::shared_ptr<Dataset> DatasetPtr;
 /// help of class encapsulation.
 ///
 /// Secondly, the performance should have not much difference with
-/// vector but slight better. The linear model always means fast in
+/// vector but slightly better. The linear model always means fast in
 /// industry and that "slightly" is good for all users.
 ///
 struct Model

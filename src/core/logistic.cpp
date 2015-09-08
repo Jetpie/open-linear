@@ -121,8 +121,9 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
     if(n_classes == 2)
     {
         // initialize weights to -0.5 ~ 0.5
-        srand((unsigned int) time(0));
-        ColVector w = ColVector::Random(dimension,1) / 2;
+        // srand((unsigned int) time(0));
+        // ColVector w = ColVector::Random(dimension,1) / 2;
+        ColVector w = ColVector::Zero(dimension,1);
 
         std::vector<double> C(n_samples, penality_weights[1]);
         // rearrange labels
@@ -183,7 +184,7 @@ LogisticRegression::train(const DatasetPtr dataset, const ParamPtr param)
  *
  */
 void
-LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<double>& C, Eigen::Ref<ColVector> w)
+LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param,const std::vector<double>& C, Eigen::Ref<ColVector> w)
 {
     std::shared_ptr<Problem> problem;
     std::shared_ptr<SolverBase> solver;
@@ -192,19 +193,19 @@ LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<do
     {
         case L1R_LR:
         {
-            problem = std::make_shared<L1R_LR_Problem>(dataset);
+            problem = std::make_shared<L1R_LR_Problem>(dataset,C);
             break;
         }
         case L2R_LR:
         {
-            problem = std::make_shared<L2R_LR_Problem>(dataset);
+            problem = std::make_shared<L2R_LR_Problem>(dataset,C);
             break;
         }
         default:
             cerr << "LogisticRegression::train_ovr : invalid problem type, "
                  << "Default option (L2R_LR) will be used, "
                  << __FILE__ << "," << __LINE__ << endl;
-            problem = std::make_shared<L2R_LR_Problem>(dataset);
+            problem = std::make_shared<L2R_LR_Problem>(dataset,C);
             break;
     }
 
@@ -224,7 +225,7 @@ LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param, std::vector<do
             break;
     }
 
-    solver->solve(problem, param, w, C);
+    solver->solve(problem, param, w);
 
     cout << "--------------Dev Print--------------" << endl;
     cout <<"weights:"<<endl;
