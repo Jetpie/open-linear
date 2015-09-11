@@ -48,10 +48,6 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> C
 typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
 
-// function for absolute manipulation
-#ifndef ABS
-template<class T> inline T ABS(T x){ return (x<0?-x:x);}
-#endif
 //
 void VOUT(const char* fmt, ...);
 // very very light-weight and useful structure for <key,value> pair storage
@@ -85,8 +81,9 @@ struct Dataset
 };
 enum FormulaType
 {
-    L2R_LR,
-    L1R_LR
+    L1R_LR,
+    L2R_LR
+
 };
 enum SolverType
 {

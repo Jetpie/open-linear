@@ -25,17 +25,18 @@ namespace oplin{
 ///
 class Problem
 {
-
 public:
     explicit Problem(DatasetPtr, const std::vector<double>&);
     virtual ~Problem(void) {};
 
     virtual double loss(const Eigen::Ref<const ColVector>&) = 0;
-    virtual ColVector gradient(const Eigen::Ref<const ColVector>&) = 0;
+    virtual void gradient(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>) = 0;
+    virtual void update_weights(Eigen::Ref<ColVector>, const Eigen::Ref<const ColVector>&,
+                                const Eigen::Ref<const ColVector>&, const double&);
+    const DatasetPtr dataset_;
 
 protected:
     std::vector<double> C_;
-    const DatasetPtr dataset_;
 };
 
 // Define the problem smart pointer type for polymorphism
@@ -48,14 +49,16 @@ class L1R_LR_Problem : public Problem
 
 private:
     /** g are some reusable part of the processes*/
-    ColVector g_;
+    ColVector z_;
 
 public:
     explicit L1R_LR_Problem(DatasetPtr, const std::vector<double>&);
     ~L1R_LR_Problem();
 
     double loss(const Eigen::Ref<const ColVector>&);
-    ColVector gradient(const Eigen::Ref<const ColVector>&);
+    void gradient(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>);
+    void update_weights(Eigen::Ref<ColVector>, const Eigen::Ref<const ColVector>&,
+                        const Eigen::Ref<const ColVector>&, const double&);
 };
 /// L2-Regularized Loss Logistic Regression
 ///
@@ -64,14 +67,14 @@ class L2R_LR_Problem : public Problem
 
 private:
     /** g are some reusable part of the processes*/
-    ColVector g_;
+    ColVector z_;
 
 public:
     explicit L2R_LR_Problem(DatasetPtr, const std::vector<double>&);
     ~L2R_LR_Problem();
 
     double loss(const Eigen::Ref<const ColVector>&);
-    ColVector gradient(const Eigen::Ref<const ColVector>&);
+    void gradient(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>);
 };
 
 } // oplin

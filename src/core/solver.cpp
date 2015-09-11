@@ -1,3 +1,4 @@
+#include <cmath>
 #include "solver.hpp"
 
 namespace oplin{
@@ -15,21 +16,19 @@ GradientDescent::~GradientDescent(){}
  *   The typical form of p will be p_k = -B_k^(-1) * grad(f_k)
  *   B_k is always a symmetric and nonsingular matrix.
  *
- * @param problem
- * @param param
- * @param p
- * @param alpha
+ * @param problem Problem instance
+ * @param w       weights for optimization
+ * @param alpha   step size of line search
+ *
  */
-double
-SolverBase::line_search(ProblemPtr problem, const Eigen::Ref<ColVector>& w, const Eigen::Ref<ColVector>& grad,
-                        const Eigen::Ref<ColVector>& p, const double loss)
+size_t
+SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alpha)
 {
-    double alpha = 1.0;
     const double c1 = 1e-4;
-    const double ro = 0.5;
-    size_t epoch = 0;
-    const size_t max_epoch = 10;
-    const double dir_dirivative = grad.transpose() * p;
+    const double backoff = 0.5;
+    const size_t max_iter = 10;
+    const double dir_dirivative = grad_.transpose() * p_;
+
     // check p is descent direction
     if(dir_dirivative >= 0)
     {
@@ -38,56 +37,78 @@ SolverBase::line_search(ProblemPtr problem, const Eigen::Ref<ColVector>& w, cons
              << __FILE__ << ", line " << __LINE__ << ")."<< endl;
         throw(std::runtime_error("non-descent direction is chosen in line search, check gradient!"));
     }
+
     // precompute
-    const double sufficient_desc = loss + dir_dirivative * c1 * alpha;
+    const double sufficient_desc = prev_loss_ + dir_dirivative * c1 * alpha;
+
     // armijo condition solved by backtracing approach
     // f(x_k + a*p_k) <= f(x_k) + c*a*Delta(f_k)^T * p_k
-    while(epoch++ < max_epoch)
+    size_t iter=0;
+    for (; iter < max_iter; ++iter)
     {
-        if(problem->loss(w + alpha * p) <= sufficient_desc)
-            break;
-        alpha *= ro;
+        // update w with search direction(p) and step size(alpha)
+        problem->update_weights(w, prev_w_, p_, alpha);
+        loss_ = problem->loss(w);
+        if(loss_ <= sufficient_desc) break;
+        alpha *= backoff;
     }
-    VOUT("#iter(line search): %d\n",epoch);
-    return alpha;
+
+    return iter;
 }
 
 
 /**
  * Solve the problem on dataset with parameters
  *
- * @param problem
- * @param param
- * @param w
+ * @param problem Problem instance
+ * @param param   Parameter instance
+ * @param w       weights for optimize
+ *
  */
 void
 GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 {
-    size_t epoch = 0;
-    double last_loss = 0;
+
+    // initializations
+    loss_ = problem->loss(w);
+    grad_ = ColVector::Zero(problem->dataset_->dimension,1);
+    prev_w_ = w;
+    prev_loss_ = loss_;
     double rela_improve = 0;
     double alpha;
-    while(epoch++ < param->max_epoch)
+    size_t iter = 0;
+
+    // check if the weights already optimized
+    if(loss_ < param->abs_tol)
     {
-        double loss = problem->loss(w);
-        rela_improve = oplin::ABS(loss - last_loss);
+        return;
+        VOUT("Already optimized weights get!");
+    }
 
-        VOUT("Epoch(%d) - loss : %f | relative improvement : %f | " ,
-             epoch,loss,rela_improve);
+    // -- debug print
+    VOUT("\n*** To disable debug info: $ make DISABLE_DEBUG=yes ***\n");
+    VOUT("|%5s|%15s|%15s|%5s|\n","Epoch","Loss","Improve","#iter");
 
-        // stop criteria
-        if(rela_improve < param->rela_tol || loss < param->abs_tol)
-        {
-            VOUT("\n");
-            break;
-        }
-        //
-        last_loss = loss;
-        // for steepest gradient descent method, p is simply gradient direction
-        ColVector grad = problem->gradient(w);
-        ColVector p = (-1) * grad;
-        alpha = this->line_search(problem, w, grad, p, loss);
-        w.noalias() += alpha * p;
+    for(epoch_ = 0; epoch_ < param->max_epoch; ++epoch_)
+    {
+        /// 01 - Update gradient and line search direction p
+        //     |- for steepest gradient descent method, p is simply gradient direction
+        problem->gradient(prev_w_, grad_);
+        p_ = (-1) * grad_;
+        alpha = 1.0;
+        //     |- line search on p and update w and loss values
+        iter = this->line_search(problem, w, alpha);
+
+
+        /// 02 - Termination Check
+        rela_improve = fabs(loss_ - prev_loss_);
+        VOUT("|%5d|%15.4f|%15.6f|%5d|\n",epoch_,loss_,rela_improve,iter);
+        if(rela_improve < param->rela_tol || loss_ < param->abs_tol) break;
+
+
+        /// 03 - Update varaiables
+        prev_loss_ = loss_;
+        w.swap(prev_w_);
     }
 }
 
