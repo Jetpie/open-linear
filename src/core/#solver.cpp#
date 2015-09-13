@@ -28,6 +28,7 @@ SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alph
     double backoff = 0.5;
     const double dir_derivative = grad_.transpose() * p_;
     if (epoch_==1) {
+
         double norm_p = sqrt(p_.squaredNorm());
         alpha = (1 / norm_p);
         backoff = 0.1;

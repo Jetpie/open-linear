@@ -10,22 +10,98 @@
 
 namespace oplin
 {
-LBFGS::LBFGS(const size_t m_step=10): m_step_(m_step) {}
+LBFGS::LBFGS() : m_step_(10) {}
+LBFGS::LBFGS(const size_t m_step): m_step_(m_step) {}
 LBFGS::~LBFGS(){}
 
+/**
+ * Compute the approximate Hessian using two loop recursion
+ *
+ * @param problem
+ * @param w
+ *
+ */
 void
-LBFGS::two_loop(ProblemPtr problem, Eigen::Ref<ColVector>& w)
+LBFGS::two_loop(ProblemPtr problem, const Eigen::Ref<const ColVector>& w)
 {
+    const size_t num = s_list_.size();
+    if(!num) return;
+
+    std::vector<double> alpha(num);
+    size_t i;
+    for(i= num - 1; i >0 ;--i)
+    {
+        alpha[i] = ro_list_[i] * (double)((*s_list_[i]).transpose() * p_);
+        p_.noalias() = p_ - alpha[i] * (*y_list_[i]);
+    }
+
+    const double gamma = ro_list_[num-1] / y_list_[num-1]->squaredNorm();
+    p_.noalias() = gamma *  p_;
+    double beta;
+
+    for(i = 0; i < num; ++i)
+    {
+        beta = ro_list_[i] * (double)((*y_list_[i]).transpose() * p_);
+        p_.noalias() = p_ + * s_list_[i] * (alpha[i] - beta);
+    }
+}
+
+/**
+ * Compute search direction by multiply inverse Hessian and steepest gradient
+ * @param problem
+ * @param param
+ * @param w
+ */
+void
+LBFGS::search_direction(ProblemPtr problem, ParamPtr param, const Eigen::Ref<const ColVector>& w)
+{
+    p_ = grad_;
+    two_loop(problem, w);
+    p_.noalias() = (-1) * p_;
 
 }
-void
-LBFGS::search_direction(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
-{
 
-}
+/**
+ *
+ *
+ *
+ *
+ */
 void
-LBFGS::update(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
+LBFGS::update(ProblemPtr problem, ParamPtr param, const Eigen::Ref<const ColVector>& w)
 {
+    const size_t num = s_list_.size();
+    ColVectorPtr s_k = NULL, y_k = NULL;
+
+    // check if more than m steps of vectors have been stored
+    if(num < m_step_)
+    {
+        // declare new vector
+        s_k = std::make_shared<ColVector>(w.rows());
+        y_k = std::make_shared<ColVector>(w.rows());
+
+    }
+    // this includes the sanity check for s_k and y_k
+    if(!s_k || !y_k)
+    {
+        // the oldest ptr in the queue
+        s_k = s_list_.front();
+        y_k = y_list_.front();
+
+        // pop old steps
+        y_list_.pop_front();
+        s_list_.pop_front();
+        ro_list_.pop_front();
+    }
+
+    (*s_k).noalias() = next_w_ - w;
+    (*y_k).noalias() = next_grad_ - grad_;
+    double ro_k = (*y_k).transpose() * (*s_k);
+    ro_k = 1 / ro_k;
+
+    y_list_.push_back(y_k);
+    s_list_.push_back(s_k);
+    ro_list_.push_back(ro_k);
 
 }
 
@@ -35,9 +111,13 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 
     // initializations
     loss_ = problem->loss(w);
-    grad_ = ColVector::Zero(problem->dataset_->dimension,1);
-    prev_w_ = w;
-    prev_loss_ = loss_;
+    grad_ = ColVector::Zero(w.rows(),1);
+    problem->gradient(w, grad_);
+
+    next_grad_ = ColVector::Zero(w.rows(),1);
+    next_loss_ = loss_;
+    next_w_ = w;
+
     double rela_improve = 0;
     double alpha;
     size_t iter = 0;
@@ -55,24 +135,35 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 
     for(epoch_ = 0; epoch_ < param->max_epoch; ++epoch_)
     {
-        /// 01 - Update gradient and line search direction p
-        problem->gradient(prev_w_, grad_);
-        // two loop to get search direction
-        search_dirction(problem, param, w);
-        alpha = 1.0;
+
+        /*** Iteration - k ***/
+
+        /// 01 - Update line search direction p
+        //     |- the typical form of p will be p_k = -B_k^(-1) * grad(f_k)
+        search_direction(problem, param, w);
         //     |- line search on p and update w and loss values
+        alpha = 1.0;
         iter = this->line_search(problem, w, alpha);
 
 
         /// 02 - Termination Check
-        rela_improve = fabs(loss_ - prev_loss_);
-        VOUT("|%5d|%15.4f|%15.6f|%5d|\n",epoch_,loss_,rela_improve,iter);
-        if(rela_improve < param->rela_tol || loss_ < param->abs_tol) break;
+        rela_improve = fabs(next_loss_ - loss_);
+        VOUT("|%5d|%15.4f|%15.6f|%5d|\n",epoch_,next_loss_,rela_improve,iter);
+        if(rela_improve < param->rela_tol || next_loss_ < param->abs_tol)
+        {
+            // assign next_w_ to w as return value
+            w.swap(next_w_);
+            break;
+        }
+
+        /// 03 - Update varaiables
+        problem->gradient(next_w_, next_grad_);
 
         update(problem, param, w);
-        /// 03 - Update varaiables
-        prev_loss_ = loss_;
-        w.swap(prev_w_);
+
+        loss_ = next_loss_;
+        w.swap(next_w_);
+        grad_.swap(next_grad_);
     }
 }
 

@@ -30,14 +30,14 @@ public:
 protected:
     /** buffer for loss value at iteration k */
     double loss_;
-    /** buffer for loss value at iteration k-1 */
-    double prev_loss_;
+    /** buffer for loss value at iteration k+1 */
+    double next_loss_;
     /** column vector to store steepest gradient at iteration k */
     ColVector grad_;
-    /** column vector to store steepest gradient at iteration k-1 */
-    ColVector prev_grad_;
-    /** column vector to store steepest gradient at iteration k-1 */
-    ColVector prev_w_;
+    /** column vector to store steepest gradient at iteration k+1 */
+    ColVector next_grad_;
+    /** column vector to store steepest gradient at iteration k+1 */
+    ColVector next_w_;
     /** column vector to store search direction*/
     ColVector p_;
     size_t epoch_;
@@ -64,31 +64,23 @@ public:
 class LBFGS: public SolverBase
 {
 public:
-    LBFGS(const size_t m_step);
+    LBFGS();
+    LBFGS(const size_t);
     ~LBFGS();
     void solve(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&);
 
 private:
-    struct ColVectorPtrDeque : public std::deque<ColVector*> {
-        ~ColVectorPtrDeque()
-        {
-            for (size_t i = 0; i < size(); ++i) {
-                if ((*this)[i])
-                {
-                    delete (*this)[i];
-                }
-            }
-        }
-    };
-    void two_loop(ProblemPtr, Eigen::Ref<ColVector>&);
-    void search_direction(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&);
-    void update(ProblemPtr, ParamPtr, Eigen::Ref<ColVector>&);
+
+    void two_loop(ProblemPtr, const Eigen::Ref<const ColVector>&);
+    void search_direction(ProblemPtr, ParamPtr, const Eigen::Ref<const ColVector>&);
+    void update(ProblemPtr, ParamPtr, const Eigen::Ref<const ColVector>&);
 
 
     /** m steps to keep */
     size_t m_step_;
-    ColVectorPtrDeque y_list_;
-    ColVectorPtrDeque s_list_;
+
+    std::deque<ColVectorPtr> y_list_;
+    std::deque<ColVectorPtr> s_list_;
     std::deque<double> ro_list_;
 
 };

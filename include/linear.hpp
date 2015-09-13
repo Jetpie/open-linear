@@ -47,6 +47,7 @@ typedef Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor> C
 // smart pointers
 typedef std::shared_ptr<SpColMatrix> SpColMatrixPtr;
 typedef std::shared_ptr<ColMatrix> ColMatrixPtr;
+typedef std::shared_ptr<ColVector> ColVectorPtr;
 
 //
 void VOUT(const char* fmt, ...);

@@ -217,9 +217,14 @@ LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param,const std::vect
             solver = std::make_shared<GradientDescent>();
             break;
         }
+        case L_BFGS:
+        {
+            solver = std::make_shared<oplin::LBFGS>();
+            break;
+        }
         default:
             cerr << "LogisticRegression::train : invalid solver type, "
-                 << "Default option (L_BFGS) will be used, "
+                 << "Default option (LBFGS) will be used, "
                  << __FILE__ << "," << __LINE__ << endl;
             // TODO : add default initialization on solver
             break;
@@ -228,8 +233,11 @@ LogisticRegression::train_ovr(DatasetPtr dataset, ParamPtr param,const std::vect
     solver->solve(problem, param, w);
 
     cout << "--------------Dev Print--------------" << endl;
-    cout <<"weights:"<<endl;
-    cout << w <<endl;
+    if(w.rows()<100)
+    {
+        cout <<"weights:"<<endl;
+        cout << w <<endl;
+    }
     cout << "-----------------End-----------------" << endl;
     return;
 }
