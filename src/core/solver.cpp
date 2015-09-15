@@ -26,8 +26,9 @@ SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alph
 {
     const double c1 = 1e-4;
     double backoff = 0.5;
-    const double dir_derivative = grad_.transpose() * p_;
-    if (epoch_==1) {
+    const double dir_derivative = steepest_grad_.transpose() * p_;
+    if (epoch_==1)
+    {
         double norm_p = sqrt(p_.squaredNorm());
         alpha = (1 / norm_p);
         backoff = 0.1;
@@ -73,10 +74,10 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
 
     // initializations
     loss_ = problem->loss(w);
-    grad_ = ColVector::Zero(w.rows(),1);
-    problem->gradient(w, grad_);
-
-    next_grad_ = ColVector::Zero(w.rows(),1);
+    steepest_grad_ = ColVector::Zero(w.rows(),1);
+    problem->gradient_Fx(w, steepest_grad_);
+    problem->gradient_Rx(w, steepest_grad_);
+    // next_grad_ = ColVector::Zero(w.rows(),1);
     next_loss_ = loss_;
     next_w_ = w;
     double rela_improve = 0;
@@ -101,7 +102,7 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
 
         /// 01 - Update line search direction p
         //     |- for steepest gradient descent method, p is simply gradient direction
-        p_ = (-1) * grad_;
+        p_ = (-1) * steepest_grad_;
         //     |- line search on p and update w and loss values
         alpha = 1.0;
         iter = this->line_search(problem, w, alpha);
@@ -118,10 +119,11 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
         }
 
         /// 03 - Update varaiables
-        problem->gradient(next_w_, next_grad_);
+        problem->gradient_Fx(next_w_, steepest_grad_);
+        problem->gradient_Rx(next_w_, steepest_grad_);
         loss_ = next_loss_;
         w.swap(next_w_);
-        grad_.swap(next_grad_);
+        // grad_.swap(next_grad_);
     }
 }
 

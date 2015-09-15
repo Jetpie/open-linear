@@ -32,6 +32,8 @@ protected:
     double loss_;
     /** buffer for loss value at iteration k+1 */
     double next_loss_;
+    /** column vector to store steepest gradient k */
+    ColVector steepest_grad_;
     /** column vector to store steepest gradient at iteration k */
     ColVector grad_;
     /** column vector to store steepest gradient at iteration k+1 */
@@ -40,6 +42,7 @@ protected:
     ColVector next_w_;
     /** column vector to store search direction*/
     ColVector p_;
+    /** epoch */
     size_t epoch_;
 
     virtual size_t line_search(const ProblemPtr, Eigen::Ref<ColVector>, double& alpha);
@@ -72,7 +75,7 @@ public:
 private:
 
     void two_loop(ProblemPtr, const Eigen::Ref<const ColVector>&);
-    void search_direction(ProblemPtr, ParamPtr, const Eigen::Ref<const ColVector>&);
+    void search_direction(ProblemPtr, const Eigen::Ref<const ColVector>&);
     void update(ProblemPtr, ParamPtr, const Eigen::Ref<const ColVector>&);
 
 

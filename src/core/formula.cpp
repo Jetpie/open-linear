@@ -16,16 +16,25 @@
 // @license: See LICENSE at root directory
 #include "formula.hpp"
 namespace oplin{
+
 using std::cout;
 using std::endl;
 using std::cerr;
 using namespace Eigen;
+
 Problem::Problem(DatasetPtr dataset, const std::vector<double>& C) : dataset_(dataset)
 {
     // use swap trick
     std::vector<double>(C).swap(C_);
-    // C_ = C;
+    regularizer_ = NULL;
 }
+
+void
+Problem::gradient_Rx(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
+{
+    if(regularizer_) regularizer_->gradient(w,grad);
+}
+
 void
 Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<const ColVector>& w,
                                 const Eigen::Ref<const ColVector>& p, const double& alpha)
@@ -33,41 +42,10 @@ Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<const ColV
     new_w.noalias() = w + alpha * p;
 }
 
-
-/*********************************************************************
- *                                  L1-Regularized Logistic Regression
- *********************************************************************/
-L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : Problem(dataset, C)
-{
-    z_ = ColVector(dataset->n_samples, 1);
-}
-
-L1R_LR_Problem::~L1R_LR_Problem(){}
-
-/**
- * Compute the L1-regularized loss functionn
- *
- * @param w weights
- *
- */
 double
-L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
+L1_Regularizer::loss(const Eigen::Ref<const ColVector>& w)
 {
-    // loss value, initilization
-    // l1-norm regularization term
-    double f = w.lpNorm<1>();
-
-    std::vector<double> y = dataset_->y;
-
-    // W^T X
-    z_.noalias() = w.transpose() * (*(dataset_->X));
-
-    // loss function : negative log likelihood
-    for(size_t i = 0; i < dataset_->n_samples; ++i)
-        f += C_[i] * log( 1 + exp(-y[i] * z_(i) ) );
-
-
-    return f;
+    return w.lpNorm<1>();
 }
 
 /**
@@ -80,24 +58,11 @@ L1R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
  * @param w weights
  */
 void
-L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
+L1_Regularizer::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
 {
-    const std::vector<double> y = dataset_->y;
-
-    for(size_t i = 0; i < dataset_->n_samples; ++i)
-    {
-        // h_w(y_i,x_i) - sigmoid function
-        z_(i) = 1 / (1+exp(-y[i]*z_(i)));
-        // C * (h_w(y_i,x_i) - 1) * y[i]
-        z_(i) = C_[i]*(z_(i)-1)*y[i];
-    }
-    // declare noalias here to enforce lazy evaluation for memory saving
-    grad.noalias() = *(dataset_->X) * z_;
-
-
     // this is the key part of the well defined pesudo-gradient in
     // Jianfeng et al's paper
-    for(size_t i=0; i < dataset_->dimension;++i)
+    for(int i=0; i < grad.rows(); ++i)
     {
         if(w(i) == 0)
         {
@@ -110,8 +75,84 @@ L1R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVec
             grad(i) += w(i) > 0? 1 : (-1);
         }
     }
-
 }
+
+double
+L2_Regularizer::loss(const Eigen::Ref<const ColVector>& w)
+{
+    return (w.squaredNorm() * 0.5);
+}
+
+void
+L2_Regularizer::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
+{
+    grad.noalias() += w;
+}
+
+/*********************************************************************
+ *                                                 Logistic Regression
+ *********************************************************************/
+LR_Problem::LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : Problem(dataset, C)
+{
+    z_ = ColVector(dataset->n_samples, 1);
+}
+LR_Problem::~LR_Problem(){}
+
+/**
+ * Compute the loss functionn
+ *
+ * @param w weights
+ *
+ */
+double
+LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
+{
+
+    double f = regularizer_? regularizer_->loss(w):0;
+    const std::vector<double>& y = dataset_->y;
+
+    // W^T X
+    z_.noalias() = w.transpose() * (*(dataset_->X));
+
+    // loss function : negative log likelihood
+    for(size_t i = 0; i < dataset_->n_samples; ++i)
+        f += C_[i] * log( 1 + exp(-y[i] * z_(i) ) );
+
+
+    return f;
+}
+
+
+/**
+ * Compute the gradient descent direction
+ *
+ * @param w weights
+ */
+void
+LR_Problem::gradient_Fx(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
+{
+    const std::vector<double>& y = dataset_->y;
+
+    for(size_t i = 0; i < dataset_->n_samples; ++i)
+    {
+        // h_w(y_i,x_i) - sigmoid function
+        z_(i) = 1 / (1+exp(-y[i]*z_(i)));
+        // C * (h_w(y_i,x_i) - 1) * y[i]
+        z_(i) = C_[i]*(z_(i)-1)*y[i];
+    }
+    // declare noalias here to enforce lazy evaluation for memory saving
+    grad.noalias() = *(dataset_->X) * z_;
+}
+
+/*********************************************************************
+ *                                  L1-Regularized Logistic Regression
+ *********************************************************************/
+L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : LR_Problem(dataset, C)
+{
+    regularizer_ = std::make_shared<L1_Regularizer>();
+}
+L1R_LR_Problem::~L1R_LR_Problem(){}
+
 void
 L1R_LR_Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<const ColVector>& w,
                                const Eigen::Ref<const ColVector>& p, const double& alpha)
@@ -127,62 +168,10 @@ L1R_LR_Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<con
 /*********************************************************************
  *                                  L2-Regularized Logistic Regression
  *********************************************************************/
-L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : Problem(dataset, C)
+L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : LR_Problem(dataset, C)
 {
-    z_ = ColVector(dataset->n_samples, 1);
+    regularizer_ = std::make_shared<L2_Regularizer>();
 }
-
 L2R_LR_Problem::~L2R_LR_Problem(){}
-
-/**
- * Compute the L2-regularized loss functionn
- *
- * @param w
- * @param C
- *
- */
-double
-L2R_LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
-{
-    // loss value, initilization
-    // l2-norm regularization term
-    double f = w.squaredNorm() / 2.0;
-
-    std::vector<double> y = dataset_->y;
-
-    // W^T X
-    z_.noalias() = w.transpose() * (*(dataset_->X));
-
-    // loss function : negative log likelihood
-    for(size_t i = 0; i < dataset_->n_samples; ++i)
-        f += C_[i] * log( 1 + exp(-y[i] * z_(i) ) );
-
-
-    return f;
-}
-
-/**
- * Compute the L2-regularized gradient descent direction
- *
- *
- */
-void
-L2R_LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
-{
-    const std::vector<double> y = dataset_->y;
-
-    for(size_t i = 0; i < dataset_->n_samples; ++i)
-    {
-        // h_w(y_i,x_i) - sigmoid function
-        z_(i) = 1 / (1+exp(-y[i]*z_(i)));
-        // C * (h_w(y_i,x_i) - 1) * y[i]
-        z_(i) = C_[i]*(z_(i)-1)*y[i];
-
-    }
-    // declare noalias here to enforce lazy evaluation for memory saving
-    grad.noalias() = (*(dataset_->X)) * z_ ;
-    grad = grad + w;
-
-}
 
 } // oplin
