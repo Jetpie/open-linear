@@ -112,6 +112,7 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 
     // initializations
     loss_ = problem->loss(w);
+
     grad_ = ColVector::Zero(w.rows(),1);
     problem->gradient_Fx(w, grad_);
     steepest_grad_ = grad_;
@@ -125,6 +126,7 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
         problem->gradient_Rx(w,grad_);
         steepest_grad_ = grad_;
     }
+
     next_grad_ = ColVector::Zero(w.rows(),1);
     next_loss_ = loss_;
     next_w_ = w;

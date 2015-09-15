@@ -20,7 +20,6 @@ namespace oplin{
 using std::cout;
 using std::endl;
 using std::cerr;
-using namespace Eigen;
 
 Problem::Problem(DatasetPtr dataset, const std::vector<double>& C) : dataset_(dataset)
 {
@@ -150,6 +149,12 @@ LR_Problem::gradient_Fx(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVect
 L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : LR_Problem(dataset, C)
 {
     regularizer_ = std::make_shared<L1_Regularizer>();
+    if(!regularizer_)
+    {
+        cerr << "L1R_LR_Problem::L1R_LR_Problem : Failed to declare regularizer! ("
+             << __FILE__ << ", line " << __LINE__ << ")."<< endl;
+        throw(std::bad_alloc());
+    }
 }
 L1R_LR_Problem::~L1R_LR_Problem(){}
 
@@ -171,6 +176,12 @@ L1R_LR_Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<con
 L2R_LR_Problem::L2R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C) : LR_Problem(dataset, C)
 {
     regularizer_ = std::make_shared<L2_Regularizer>();
+    if(!regularizer_)
+    {
+        cerr << "L2R_LR_Problem::L2R_LR_Problem : Failed to declare regularizer! ("
+             << __FILE__ << ", line " << __LINE__ << ")."<< endl;
+        throw(std::bad_alloc());
+    }
 }
 L2R_LR_Problem::~L2R_LR_Problem(){}
 
