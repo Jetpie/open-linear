@@ -75,8 +75,8 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
     // initializations
     loss_ = problem->loss(w);
     steepest_grad_ = ColVector::Zero(w.rows(),1);
-    problem->gradient_Fx(w, steepest_grad_);
-    problem->gradient_Rx(w, steepest_grad_);
+    problem->gradient(w, steepest_grad_);
+    problem->regularized_gradient(w, steepest_grad_);
     // next_grad_ = ColVector::Zero(w.rows(),1);
     next_loss_ = loss_;
     next_w_ = w;
@@ -119,8 +119,8 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
         }
 
         /// 03 - Update varaiables
-        problem->gradient_Fx(next_w_, steepest_grad_);
-        problem->gradient_Rx(next_w_, steepest_grad_);
+        problem->gradient(next_w_, steepest_grad_);
+        problem->regularized_gradient(next_w_, steepest_grad_);
         loss_ = next_loss_;
         w.swap(next_w_);
         // grad_.swap(next_grad_);

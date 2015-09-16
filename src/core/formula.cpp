@@ -29,7 +29,7 @@ Problem::Problem(DatasetPtr dataset, const std::vector<double>& C) : dataset_(da
 }
 
 void
-Problem::gradient_Rx(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
+Problem::regularized_gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
 {
     if(regularizer_) regularizer_->gradient(w,grad);
 }
@@ -128,7 +128,7 @@ LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
  * @param w weights
  */
 void
-LR_Problem::gradient_Fx(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
+LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector> grad)
 {
     const std::vector<double>& y = dataset_->y;
 

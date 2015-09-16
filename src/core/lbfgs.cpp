@@ -54,10 +54,23 @@ LBFGS::two_loop(ProblemPtr problem, const Eigen::Ref<const ColVector>& w)
  * @param w
  */
 void
-LBFGS::search_direction(ProblemPtr problem, const Eigen::Ref<const ColVector>& w)
+LBFGS::search_direction(ProblemPtr problem, ParamPtr param, const Eigen::Ref<const ColVector>& w)
 {
     p_ = steepest_grad_;
     two_loop(problem, w);
+
+    // limit the search direction for l1 norm
+    if(param->problem_type == 0)
+    {
+        for(int i=0; i < w.rows(); ++i)
+        {
+            if(steepest_grad_[i] * p_[i] <= 0)
+            {
+                p_[i] = 0;
+            }
+        }
+    }
+
     p_.noalias() = (-1) * p_;
 }
 
@@ -114,16 +127,16 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
     loss_ = problem->loss(w);
 
     grad_ = ColVector::Zero(w.rows(),1);
-    problem->gradient_Fx(w, grad_);
+    problem->gradient(w, grad_);
     steepest_grad_ = grad_;
     if(param->problem_type == 0)
     {
         steepest_grad_ = grad_;
-        problem->gradient_Rx(w, steepest_grad_);
+        problem->regularized_gradient(w, steepest_grad_);
     }
     else
     {
-        problem->gradient_Rx(w,grad_);
+        problem->regularized_gradient(w,grad_);
         steepest_grad_ = grad_;
     }
 
@@ -153,7 +166,7 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 
         /// 01 - Update line search direction p
         //     |- the typical form of p will be p_k = -B_k^(-1) * grad(f_k)
-        search_direction(problem, w);
+        search_direction(problem, param, w);
         //     |- line search on p and update w and loss values
         alpha = 1.0;
         iter = this->line_search(problem, w, alpha);
@@ -170,16 +183,16 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
         }
 
         /// 03 - Update varaiables
-        problem->gradient_Fx(next_w_, next_grad_);
+        problem->gradient(next_w_, next_grad_);
 
         if(param->problem_type == 0)
         {
             steepest_grad_ = next_grad_;
-            problem->gradient_Rx(next_w_, steepest_grad_);
+            problem->regularized_gradient(next_w_, steepest_grad_);
         }
         else
         {
-            problem->gradient_Rx(next_w_,next_grad_);
+            problem->regularized_gradient(next_w_,next_grad_);
             steepest_grad_ = next_grad_;
         }
 

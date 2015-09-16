@@ -58,8 +58,8 @@ public:
     virtual ~Problem(void) {};
 
     virtual double loss(const Eigen::Ref<const ColVector>&) = 0;
-    virtual void gradient_Fx(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>) = 0;
-    virtual void gradient_Rx(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>);
+    virtual void gradient(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>) = 0;
+    virtual void regularized_gradient(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>);
     virtual void update_weights(Eigen::Ref<ColVector>, const Eigen::Ref<const ColVector>&,
                                 const Eigen::Ref<const ColVector>&, const double&);
 
@@ -76,10 +76,6 @@ protected:
 typedef std::shared_ptr<Problem> ProblemPtr;
 
 
-
-
-
-
 /// basic logistic regression
 ///
 class LR_Problem : public Problem
@@ -90,7 +86,7 @@ public:
     ~LR_Problem();
 
     double loss(const Eigen::Ref<const ColVector>&);
-    void gradient_Fx(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>);
+    void gradient(const Eigen::Ref<const ColVector>&, Eigen::Ref<ColVector>);
 
 protected:
     /** z are some reusable part of the processes */

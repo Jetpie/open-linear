@@ -75,7 +75,7 @@ public:
 private:
 
     void two_loop(ProblemPtr, const Eigen::Ref<const ColVector>&);
-    void search_direction(ProblemPtr, const Eigen::Ref<const ColVector>&);
+    void search_direction(ProblemPtr, ParamPtr, const Eigen::Ref<const ColVector>&);
     void update(ProblemPtr, ParamPtr, const Eigen::Ref<const ColVector>&);
 
 
