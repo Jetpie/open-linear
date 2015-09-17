@@ -108,6 +108,7 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
         iter = this->line_search(problem, w, alpha);
 
 
+
         /// 02 - Termination Check
         rela_improve = fabs(next_loss_ - loss_);
         VOUT("|%5d|%15.4f|%15.6f|%5d|\n",epoch_,next_loss_,rela_improve,iter);
