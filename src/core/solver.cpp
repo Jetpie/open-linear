@@ -50,10 +50,11 @@ SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alph
         // update w with search direction(p) and step size(alpha)
         problem->update_weights(next_w_, w, p_, alpha);
         next_loss_ = problem->loss(next_w_);
-        // cout << "next_loss: " << next_loss_ << " | sufficient_desc: " << loss_+dir_derivative * alpha << endl;
+        // cout << "next_loss: " << next_loss_ << " | sufficient_desc: " << loss_+c1*dir_derivative * alpha << endl;
         if(next_loss_ <= loss_ + c1 * dir_derivative * alpha) break;
         alpha *= backoff;
         iter++;
+
     }
 
     return iter;
@@ -110,7 +111,7 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
 
 
         /// 02 - Termination Check
-        rela_improve = fabs(next_loss_ - loss_);
+        rela_improve = fabs((next_loss_ - loss_) / loss_);
         VOUT("|%5d|%15.4f|%15.6f|%5d|\n",epoch_,next_loss_,rela_improve,iter);
         if(rela_improve < param->rela_tol || next_loss_ < param->abs_tol)
         {

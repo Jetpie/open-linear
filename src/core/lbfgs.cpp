@@ -111,11 +111,26 @@ LBFGS::update(ProblemPtr problem, ParamPtr param, const Eigen::Ref<const ColVect
     (*s_k).noalias() = next_w_ - w;
     (*y_k).noalias() = next_grad_ - grad_;
     double ro_k = (*y_k).transpose() * (*s_k);
+
+    if(ro_k == 0)
+    {
+        std::cout << "Warning: ro_k is unexpectedly divide by zero(y_k^T * s_k)."
+            " Auto fixed (compile with debug to see detail)!" << std::endl;
+        VOUT("************************************************************\n"
+             "ro_k = 1 / (s_k.traspose() * y_k): The reason cause dividend\n"
+             "to be zero is mostly gradients between two epochs is too close to zero.\n"
+             "Fix this by set ColVector::Ones(y_k->rows())to y_k.\n"
+             "************************************************************\n");
+        *y_k = ColVector::Ones(y_k->rows());
+        ro_k = (*y_k).transpose() * (*s_k);
+    }
+
     ro_k = 1 / ro_k;
 
     y_list_.push_back(y_k);
     s_list_.push_back(s_k);
     ro_list_.push_back(ro_k);
+
 
 }
 
@@ -128,7 +143,6 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 
     grad_ = ColVector::Zero(w.rows(),1);
     problem->gradient(w, grad_);
-    steepest_grad_ = grad_;
     if(param->problem_type == 0)
     {
         steepest_grad_ = grad_;
@@ -163,6 +177,8 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
     {
 
         /*** Iteration - k ***/
+        // w = w_k, grad = grad_k
+        // next_w = w_{k+1}, next_grad = grad_{k+1}
 
         /// 01 - Update line search direction p
         //     |- the typical form of p will be p_k = -B_k^(-1) * grad(f_k)
@@ -173,7 +189,7 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
 
 
         /// 02 - Termination Check
-        rela_improve = fabs(next_loss_ - loss_);
+        rela_improve = fabs((next_loss_ - loss_) / loss_);
         VOUT("|%5d|%15.4f|%15.6f|%5d|\n",epoch_,next_loss_,rela_improve,iter);
         if(rela_improve < param->rela_tol || next_loss_ < param->abs_tol)
         {
@@ -195,6 +211,8 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
             problem->regularized_gradient(next_w_,next_grad_);
             steepest_grad_ = next_grad_;
         }
+        // problem->regularized_gradient(next_w_,next_grad_);
+        // steepest_grad_ = next_grad_;
 
         update(problem, param, w);
 

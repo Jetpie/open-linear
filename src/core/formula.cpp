@@ -44,11 +44,12 @@ Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<const ColV
 double
 L1_Regularizer::loss(const Eigen::Ref<const ColVector>& w)
 {
+
     return w.lpNorm<1>();
 }
 
 /**
- * Compute the L1-regularized gradient descent direction
+ * Compute the L1-regularized gradient
  *
  * Reference:
  * Galen Andrew and Jianfeng Gao. 2007. Scalable training of L1-regularized \
@@ -108,15 +109,15 @@ LR_Problem::loss(const Eigen::Ref<const ColVector>& w)
 {
 
     double f = regularizer_? regularizer_->loss(w):0;
+
     const std::vector<double>& y = dataset_->y;
 
     // W^T X
     z_.noalias() = w.transpose() * (*(dataset_->X));
-
+    // std::cout << z_.sum() << std::endl;
     // loss function : negative log likelihood
     for(size_t i = 0; i < dataset_->n_samples; ++i)
         f += C_[i] * log( 1 + exp(-y[i] * z_(i) ) );
-
 
     return f;
 }
@@ -139,6 +140,7 @@ LR_Problem::gradient(const Eigen::Ref<const ColVector>& w, Eigen::Ref<ColVector>
         // C * (h_w(y_i,x_i) - 1) * y[i]
         z_(i) = C_[i]*(z_(i)-1)*y[i];
     }
+
     // declare noalias here to enforce lazy evaluation for memory saving
     grad.noalias() = *(dataset_->X) * z_;
 }
