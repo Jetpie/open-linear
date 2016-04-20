@@ -159,7 +159,6 @@ L1R_LR_Problem::L1R_LR_Problem(DatasetPtr dataset, const std::vector<double>& C)
     }
 }
 L1R_LR_Problem::~L1R_LR_Problem(){}
-
 void
 L1R_LR_Problem::update_weights(Eigen::Ref<ColVector> new_w, const Eigen::Ref<const ColVector>& w,
                                const Eigen::Ref<const ColVector>& p, const double& alpha)

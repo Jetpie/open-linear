@@ -101,7 +101,6 @@ class L1R_LR_Problem : public LR_Problem
 public:
     explicit L1R_LR_Problem(DatasetPtr, const std::vector<double>&);
     ~L1R_LR_Problem();
-
     void update_weights(Eigen::Ref<ColVector>, const Eigen::Ref<const ColVector>&,
                         const Eigen::Ref<const ColVector>&, const double&);
 

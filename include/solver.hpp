@@ -12,11 +12,12 @@
 #include "formula.hpp"
 namespace oplin{
 
+/// armijo condition - only given sufficient decrease
+/// wolfe condition - satisfy "sufficient condition" and curvatute condition
 enum LineSearchCondition
 {
-    CONSTANT,
     ARMIJO_CONDITION,
-    WHOLF_CONDITION
+    WOLFE_CONDITION
 };
 /// Base class for solvers
 ///
@@ -44,8 +45,12 @@ protected:
     ColVector p_;
     /** epoch */
     size_t epoch_;
+    size_t line_search_choice_;
 
+    virtual size_t backtracking_line_search(const ProblemPtr, Eigen::Ref<ColVector>, double& alpha);
+    virtual size_t wolfe_line_search(const ProblemPtr, Eigen::Ref<ColVector>, double& alpha);
     virtual size_t line_search(const ProblemPtr, Eigen::Ref<ColVector>, double& alpha);
+
 };
 
 /// Gradint descent optimizer

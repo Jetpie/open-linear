@@ -10,27 +10,24 @@ using namespace Eigen;
 
 SolverBase::~SolverBase(){}
 GradientDescent::~GradientDescent(){}
-/**
- * Line search:
- *   The basic line search form would be: x_{k+1} = x_k + p_k * alpha_k
- *   The typical form of p will be p_k = -B_k^(-1) * grad(f_k)
- *   B_k is always a symmetric and nonsingular matrix.
- *
- * @param problem Problem instance
- * @param w       weights for optimization
- * @param alpha   step size of line search
- *
- */
+
+
 size_t
-SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alpha)
+SolverBase::wolfe_line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alpha)
+{
+    return 0;
+}
+
+size_t
+SolverBase::backtracking_line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alpha)
 {
     const double c1 = 1e-4;
     double backoff = 0.5;
     const double dir_derivative = steepest_grad_.transpose() * p_;
     if (epoch_==1)
     {
-        double norm_p = sqrt(p_.squaredNorm());
-        alpha = (1 / norm_p);
+        const double snorm_p = p_.squaredNorm();
+        alpha = (1 / snorm_p);
         backoff = 0.1;
     }
     // check p is descent direction
@@ -60,7 +57,27 @@ SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alph
     return iter;
 }
 
+size_t
+SolverBase::line_search(ProblemPtr problem, Eigen::Ref<ColVector>w, double& alpha)
+{
+    switch(this->line_search_choice_)
+    {
+        case ARMIJO_CONDITION:
+        {
+            return backtracking_line_search(problem,w,alpha);
+        }
+        case WOLFE_CONDITION:
+        {
+            return wolfe_line_search(problem,w,alpha);
+        }
+        default:
+            cerr << "SolverBase::line_search : bad line search condition choice, this is program logic error ("
+                 << __FILE__ << ", line " << __LINE__ << ")."<< endl;
+            throw(std::runtime_error("line search bad choice!"));
+            break;
+    }
 
+}
 /**
  * Solve the problem on dataset with parameters
  *
@@ -85,6 +102,7 @@ GradientDescent::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>
     double alpha;
     size_t iter = 0;
 
+    line_search_choice_ = ARMIJO_CONDITION;
     // check if the weights already optimized
     if(loss_ < param->abs_tol)
     {

@@ -162,6 +162,7 @@ LBFGS::solve(ProblemPtr problem, ParamPtr param, Eigen::Ref<ColVector>& w)
     double alpha;
     size_t iter = 0;
 
+    line_search_choice_ = ARMIJO_CONDITION;
     // check if the weights already optimized
     if(loss_ < param->abs_tol)
     {
